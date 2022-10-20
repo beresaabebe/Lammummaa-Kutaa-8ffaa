@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Lammummaa Kutaa 8ffaa</string>
+    <string name="about_us">About us</string>
+    <string name="more_apps">More apps</string>
+    <string name="rate">Rate</string>
+    <string name="update">Update</string>
+    <string name="share">Share</string>
+    <string name="exit">Exit</string>
+    <string name="change_style">Change style</string>
+    <string name="website">Website</string>
+    <string name="email">Email</string>
+    <string name="facebook">Facebook</string>
+    <string name="phone">Phone</string>
+    <string name="version">Version - </string>
+    <string name="banner_ad_unit_id">ca-app-pub-8504401574247581/6936369123</string>
+    <string name="test_interstitial_ads_unit_id">ca-app-pub-8504401574247581/7044960588</string>
+<!--      ca-app-pub-8504401574247581/8927402404-->
+</resources>

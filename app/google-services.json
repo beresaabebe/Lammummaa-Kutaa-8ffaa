@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "221475144366",
+    "project_id": "lammummaa-kutaa-8ffaa",
+    "storage_bucket": "lammummaa-kutaa-8ffaa.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:221475144366:android:bc10e9eff08c28d47ea33f",
+        "android_client_info": {
+          "package_name": "com.beckytech.lammummaakutaa8ffaa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "221475144366-1ipr1ge99762p2umff6qp59rs0rehf60.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCyzEtoplAqNvBfKDgEn6c9M5Zk1gLnYfc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "221475144366-1ipr1ge99762p2umff6qp59rs0rehf60.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
