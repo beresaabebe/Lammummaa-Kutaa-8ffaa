@@ -12,7 +12,6 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
-        android:name=".MyApplication"
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
@@ -26,13 +25,11 @@
             android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"
-            android:exported="false"
-            android:hardwareAccelerated="true" />
+            android:exported="false"/>
         <activity
             android:name=".activity.SplashActivity"
             android:exported="true"
-            android:theme="@style/SplashTheme"
-            android:hardwareAccelerated="true">
+            android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
