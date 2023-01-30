@@ -93,7 +93,6 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
         showAdWithDelay();
     }
 
-
     private void callAds() {
         AudienceNetworkAds.initialize(this);
 
@@ -174,7 +173,6 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
         super.onBackPressed();
         showAdWithDelay();
     }
-
     @Override
     protected void onDestroy() {
         if (adView != null) {
