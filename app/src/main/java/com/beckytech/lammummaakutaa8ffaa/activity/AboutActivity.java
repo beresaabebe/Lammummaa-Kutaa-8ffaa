@@ -28,6 +28,7 @@ import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
 import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.InterstitialAdListener;
+import com.google.android.gms.ads.AdRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,10 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
+
+        com.google.android.gms.ads.AdView mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         callAds();
 

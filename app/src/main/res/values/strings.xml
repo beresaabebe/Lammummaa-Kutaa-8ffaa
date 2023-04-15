@@ -13,6 +13,8 @@
     <string name="phone">Phone</string>
     <string name="version">Version - </string>
     <string name="banner_ad_unit_id">ca-app-pub-8504401574247581/6936369123</string>
+    <string name="banner_ad_unit_id_main">ca-app-pub-8504401574247581/5634710646</string>
     <string name="test_interstitial_ads_unit_id">ca-app-pub-8504401574247581/7044960588</string>
-<!--      ca-app-pub-8504401574247581/8927402404-->
+    <string name="download_more_apps">Download more apps</string>
+    <!--      ca-app-pub-8504401574247581/8927402404-->
 </resources>

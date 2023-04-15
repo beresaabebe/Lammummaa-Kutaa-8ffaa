@@ -24,10 +24,6 @@ public class Adapter extends RecyclerView.Adapter<Adapter.PageViewHolder> {
         this.bookClicked = bookClicked;
     }
 
-    public interface onBookClicked {
-        void clickedBook(Model model);
-    }
-
     @NonNull
     @Override
     public PageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -48,6 +44,9 @@ public class Adapter extends RecyclerView.Adapter<Adapter.PageViewHolder> {
         return list.size();
     }
 
+    public interface onBookClicked {
+        void clickedBook(Model model);
+    }
 
     protected static class PageViewHolder extends RecyclerView.ViewHolder {
 

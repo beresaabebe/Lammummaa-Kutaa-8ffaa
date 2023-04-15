@@ -23,10 +23,6 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.AboutViewHol
         this.linkClicked = linkClicked;
     }
 
-    public interface OnLinkClicked {
-        void linkClicked(AboutModel model);
-    }
-
     @NonNull
     @Override
     public AboutViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -46,9 +42,14 @@ public class AboutAdapter extends RecyclerView.Adapter<AboutAdapter.AboutViewHol
         return modelList.size();
     }
 
+    public interface OnLinkClicked {
+        void linkClicked(AboutModel model);
+    }
+
     public static class AboutViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
         TextView name;
+
         public AboutViewHolder(@NonNull View itemView) {
             super(itemView);
             imageView = itemView.findViewById(R.id.image_about);

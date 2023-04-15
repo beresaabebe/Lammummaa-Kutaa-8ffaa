@@ -23,10 +23,6 @@ public class MoreAppsAdapter extends RecyclerView.Adapter<MoreAppsAdapter.AppsVi
         this.moreAppsClicked = moreAppsClicked;
     }
 
-    public interface MoreAppsClicked {
-        public void appClicked(MoreAppsModel model);
-    }
-
     @NonNull
     @Override
     public AppsViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -46,9 +42,14 @@ public class MoreAppsAdapter extends RecyclerView.Adapter<MoreAppsAdapter.AppsVi
         return modelList.size();
     }
 
+    public interface MoreAppsClicked {
+        void appClicked(MoreAppsModel model);
+    }
+
     public static class AppsViewHolder extends RecyclerView.ViewHolder {
         ImageView appImages;
         TextView appName;
+
         public AppsViewHolder(@NonNull View itemView) {
             super(itemView);
             appImages = itemView.findViewById(R.id.more_apps_image);

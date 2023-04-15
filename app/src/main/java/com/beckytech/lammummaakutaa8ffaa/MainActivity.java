@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -35,6 +36,11 @@ import com.facebook.ads.AdError;
 import com.facebook.ads.AudienceNetworkAds;
 import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.InterstitialAdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 
@@ -53,11 +59,15 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private final SubTitleContents subTitleContent = new SubTitleContents();
     private final ContentStartPage startPage = new ContentStartPage();
     private final ContentEndPage endPage = new ContentEndPage();
+    private com.google.android.gms.ads.interstitial.InterstitialAd mInterstitialAd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_drawer);
+
+        MobileAds.initialize(this, initializationStatus -> {
+        });
 
         callAds();
 
@@ -65,6 +75,10 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        com.google.android.gms.ads.AdView mAdView = findViewById(R.id.adView_main);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
@@ -169,7 +183,29 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     @Override
     public void clickedBook(Model model) {
         showAdWithDelay();
-        startActivity(new Intent(this, BookDetailActivity.class).putExtra("data", model));
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show(MainActivity.this);
+            mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
+                @Override
+                public void onAdDismissedFullScreenContent() {
+                    super.onAdDismissedFullScreenContent();
+                    startActivity(new Intent(MainActivity.this, BookDetailActivity.class).putExtra("data", model));
+                    mInterstitialAd = null;
+                    setAds();
+                }
+
+                @Override
+                public void onAdShowedFullScreenContent() {
+                    // Called when fullscreen content is shown.
+                    // Make sure to set your reference to null so you don't
+                    // show it a second time.
+                    mInterstitialAd = null;
+                    Log.d("TAG", "The ad was shown.");
+                }
+            });
+        } else {
+            startActivity(new Intent(this, BookDetailActivity.class).putExtra("data", model));
+        }
     }
 
     private void callAds() {
@@ -233,12 +269,29 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
                 return;
             }
             // Check if ad is already expired or invalidated, and do not show ad if that is the case. You will not get paid to show an invalidated ad.
-            if(interstitialAd.isAdInvalidated()) {
+            if (interstitialAd.isAdInvalidated()) {
                 return;
             }
             // Show the ad
             interstitialAd.show();
         }, 1000 * 60 * 2); // Show the ad after 15 minutes
+    }
+
+    private void setAds() {
+        AdRequest adRequest = new AdRequest.Builder().build();
+
+        com.google.android.gms.ads.interstitial.InterstitialAd.load(this, getString(R.string.test_interstitial_ads_unit_id), adRequest,
+                new InterstitialAdLoadCallback() {
+                    @Override
+                    public void onAdLoaded(@NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
+                        mInterstitialAd = interstitialAd;
+                    }
+
+                    @Override
+                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                        mInterstitialAd = null;
+                    }
+                });
     }
 
 }
