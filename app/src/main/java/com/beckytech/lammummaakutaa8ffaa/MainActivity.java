@@ -7,8 +7,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -20,6 +23,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.beckytech.lammummaakutaa8ffaa.activity.AboutActivity;
 import com.beckytech.lammummaakutaa8ffaa.activity.BookDetailActivity;
+import com.beckytech.lammummaakutaa8ffaa.activity.PrivacyActivity;
 import com.beckytech.lammummaakutaa8ffaa.adapter.Adapter;
 import com.beckytech.lammummaakutaa8ffaa.adapter.MoreAppsAdapter;
 import com.beckytech.lammummaakutaa8ffaa.contents.ContentEndPage;
@@ -37,6 +41,8 @@ import com.facebook.ads.AudienceNetworkAds;
 import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.InterstitialAdListener;
 import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
@@ -60,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private final ContentStartPage startPage = new ContentStartPage();
     private final ContentEndPage endPage = new ContentEndPage();
     private com.google.android.gms.ads.interstitial.InterstitialAd mInterstitialAd;
+    private AdView adView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,14 +78,21 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
         callAds();
 
+        //get the reference to your FrameLayout
+        FrameLayout adContainerView = findViewById(R.id.adView_container);
+        //Create an AdView and put it into your FrameLayout
+        adView = new AdView(this);
+        adContainerView.addView(adView);
+        adView.setAdUnitId(getString(R.string.banner_ad_unit_id));
+//        adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+
+        //start requesting banner ads
+        loadBanner();
+
         AppRate.app_launched(this);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        com.google.android.gms.ads.AdView mAdView = findViewById(R.id.adView_main);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
 
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.app_name, R.string.app_name);
@@ -102,6 +116,32 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         moreAppsRecyclerView.setAdapter(moreAppsAdapter);
     }
 
+    private AdSize getAdSize() {
+        //Determine the screen width to use for the ad width.
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+
+        float widthPixels = outMetrics.widthPixels;
+        float density = outMetrics.density;
+
+        //you can also pass your selected width here in dp
+        int adWidth = (int) (widthPixels / density);
+
+        //return the optimal size depends on your orientation (landscape or portrait)
+        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
+    }
+    private void loadBanner() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .build();
+
+        AdSize adSize = getAdSize();
+        // Set the adaptive ad size to the ad view.
+        adView.setAdSize(adSize);
+
+        // Start loading the ad in the background.
+        adView.loadAd(adRequest);
+    }
     private void getMoreApps() {
         moreAppsModelList = new ArrayList<>();
         for (int i = 0; i < appsName.appNames.length; i++) {
@@ -128,6 +168,9 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
     @SuppressLint("UseCompatLoadingForDrawables")
     void MenuOptions(MenuItem item) {
+        if (item.getItemId() == R.id.action_privacy) {
+            startActivity(new Intent(this, PrivacyActivity.class));
+        }
         if (item.getItemId() == R.id.action_about_us) {
             showAdWithDelay();
             startActivity(new Intent(this, AboutActivity.class));
@@ -207,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
             startActivity(new Intent(this, BookDetailActivity.class).putExtra("data", model));
         }
     }
-
     private void callAds() {
         AudienceNetworkAds.initialize(this);
 

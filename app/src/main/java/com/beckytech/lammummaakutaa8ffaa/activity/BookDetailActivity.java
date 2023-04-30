@@ -3,7 +3,10 @@ package com.beckytech.lammummaakutaa8ffaa.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -18,6 +21,8 @@ import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.InterstitialAdListener;
 import com.github.barteksc.pdfviewer.PDFView;
 import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.MobileAds;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +31,26 @@ public class BookDetailActivity extends AppCompatActivity {
     InterstitialAd interstitialAd;
     private final String TAG = AboutActivity.class.getSimpleName();
     AdView fAdView;
+    private com.google.android.gms.ads.AdView adView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
+
+        MobileAds.initialize(this, initializationStatus -> {
+        });
+
+        //get the reference to your FrameLayout
+        FrameLayout adContainerView = findViewById(R.id.adView_container);
+        //Create an AdView and put it into your FrameLayout
+        adView = new com.google.android.gms.ads.AdView(this);
+        adContainerView.addView(adView);
+        adView.setAdUnitId(getString(R.string.banner_detail_unit_id));
+//        adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
+
+        //start requesting banner ads
+        loadBanner();
 
         callAds();
 
@@ -73,6 +94,34 @@ public class BookDetailActivity extends AppCompatActivity {
                 .scrollHandle(new DefaultScrollHandle(this))
                 .load();
     }
+
+    private com.google.android.gms.ads.AdSize getAdSize() {
+        //Determine the screen width to use for the ad width.
+        Display display = getWindowManager().getDefaultDisplay();
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        display.getMetrics(outMetrics);
+
+        float widthPixels = outMetrics.widthPixels;
+        float density = outMetrics.density;
+
+        //you can also pass your selected width here in dp
+        int adWidth = (int) (widthPixels / density);
+
+        //return the optimal size depends on your orientation (landscape or portrait)
+        return com.google.android.gms.ads.AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
+    }
+    private void loadBanner() {
+        AdRequest adRequest = new AdRequest.Builder()
+                .build();
+
+        com.google.android.gms.ads.AdSize adSize = getAdSize();
+        // Set the adaptive ad size to the ad view.
+        adView.setAdSize(adSize);
+
+        // Start loading the ad in the background.
+        adView.loadAd(adRequest);
+    }
+
     private void callAds() {
         AudienceNetworkAds.initialize(this);
 

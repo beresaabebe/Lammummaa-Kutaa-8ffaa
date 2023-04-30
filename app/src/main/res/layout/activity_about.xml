@@ -162,6 +162,13 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
 
+            <FrameLayout
+                android:id="@+id/adView_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/white">
+            </FrameLayout>
+
         </LinearLayout>
 
     </ScrollView>

@@ -10,8 +10,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class AppRate {
-    private final static String APP_TITLE = String.valueOf(R.string.app_name);// App Name
-    private static final String APP_PNAME = " com.beckytech.lammummaakutaa8ffaa";// Package Name
+    private final static String APP_TITLE = "Lammummaa Kutaa 8ffaa";// App Name
+    private static final String APP_PNAME = "com.beckytech.lammummaakutaa8ffaa";// Package Name
 
     private final static int DAYS_UNTIL_PROMPT = 3;//Min number of days
     private final static int LAUNCHES_UNTIL_PROMPT = 3;//Min number of launches
@@ -52,15 +52,16 @@ public class AppRate {
 
         LinearLayout ll = new LinearLayout(mContext);
         ll.setOrientation(LinearLayout.VERTICAL);
+        ll.setPadding(20,20,20,20);
 
         TextView tv = new TextView(mContext);
         tv.setText(String.format("If you enjoy using %s, please take a moment to rate it. Thanks for your support!", APP_TITLE));
-        tv.setWidth(240);
+//        tv.setWidth(240);
         tv.setPadding(4, 0, 4, 10);
         ll.addView(tv);
 
         Button b1 = new Button(mContext);
-        b1.setText(String.format("Rate %s", APP_TITLE));
+        b1.setText(String.format("Rate Now"));
         b1.setOnClickListener(v -> {
             mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + APP_PNAME)));
             dialog.dismiss();
