@@ -7,14 +7,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import android.view.MenuItem;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -37,16 +34,11 @@ import com.beckytech.lammummaakutaa8ffaa.model.Model;
 import com.beckytech.lammummaakutaa8ffaa.model.MoreAppsModel;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
+import com.facebook.ads.AdSize;
+import com.facebook.ads.AdView;
 import com.facebook.ads.AudienceNetworkAds;
 import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.InterstitialAdListener;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
 
@@ -65,29 +57,13 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private final SubTitleContents subTitleContent = new SubTitleContents();
     private final ContentStartPage startPage = new ContentStartPage();
     private final ContentEndPage endPage = new ContentEndPage();
-    private com.google.android.gms.ads.interstitial.InterstitialAd mInterstitialAd;
-    private AdView adView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_drawer);
 
-        MobileAds.initialize(this, initializationStatus -> {
-        });
-
         callAds();
-
-        //get the reference to your FrameLayout
-        FrameLayout adContainerView = findViewById(R.id.adView_container);
-        //Create an AdView and put it into your FrameLayout
-        adView = new AdView(this);
-        adContainerView.addView(adView);
-        adView.setAdUnitId(getString(R.string.banner_ad_unit_id));
-//        adView.setAdUnitId("ca-app-pub-3940256099942544/6300978111");
-
-        //start requesting banner ads
-        loadBanner();
 
         AppRate.app_launched(this);
 
@@ -116,32 +92,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         moreAppsRecyclerView.setAdapter(moreAppsAdapter);
     }
 
-    private AdSize getAdSize() {
-        //Determine the screen width to use for the ad width.
-        Display display = getWindowManager().getDefaultDisplay();
-        DisplayMetrics outMetrics = new DisplayMetrics();
-        display.getMetrics(outMetrics);
-
-        float widthPixels = outMetrics.widthPixels;
-        float density = outMetrics.density;
-
-        //you can also pass your selected width here in dp
-        int adWidth = (int) (widthPixels / density);
-
-        //return the optimal size depends on your orientation (landscape or portrait)
-        return AdSize.getCurrentOrientationAnchoredAdaptiveBannerAdSize(this, adWidth);
-    }
-    private void loadBanner() {
-        AdRequest adRequest = new AdRequest.Builder()
-                .build();
-
-        AdSize adSize = getAdSize();
-        // Set the adaptive ad size to the ad view.
-        adView.setAdSize(adSize);
-
-        // Start loading the ad in the background.
-        adView.loadAd(adRequest);
-    }
     private void getMoreApps() {
         moreAppsModelList = new ArrayList<>();
         for (int i = 0; i < appsName.appNames.length; i++) {
@@ -163,12 +113,14 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     public void appClicked(MoreAppsModel model) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse(model.getUrl()));
+        showAdWithDelay();
         startActivity(intent);
     }
 
     @SuppressLint("UseCompatLoadingForDrawables")
     void MenuOptions(MenuItem item) {
         if (item.getItemId() == R.id.action_privacy) {
+            showAdWithDelay();
             startActivity(new Intent(this, PrivacyActivity.class));
         }
         if (item.getItemId() == R.id.action_about_us) {
@@ -177,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         }
 
         if (item.getItemId() == R.id.action_rate) {
+            showAdWithDelay();
             String pkg = getPackageName();
             startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://play.google.com/store/apps/details?id=" + pkg)));
@@ -226,32 +179,16 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     @Override
     public void clickedBook(Model model) {
         showAdWithDelay();
-        if (mInterstitialAd != null) {
-            mInterstitialAd.show(MainActivity.this);
-            mInterstitialAd.setFullScreenContentCallback(new FullScreenContentCallback() {
-                @Override
-                public void onAdDismissedFullScreenContent() {
-                    super.onAdDismissedFullScreenContent();
-                    startActivity(new Intent(MainActivity.this, BookDetailActivity.class).putExtra("data", model));
-                    mInterstitialAd = null;
-                    setAds();
-                }
-
-                @Override
-                public void onAdShowedFullScreenContent() {
-                    // Called when fullscreen content is shown.
-                    // Make sure to set your reference to null so you don't
-                    // show it a second time.
-                    mInterstitialAd = null;
-                    Log.d("TAG", "The ad was shown.");
-                }
-            });
-        } else {
-            startActivity(new Intent(this, BookDetailActivity.class).putExtra("data", model));
-        }
+        startActivity(new Intent(this, BookDetailActivity.class).putExtra("data", model));
     }
     private void callAds() {
         AudienceNetworkAds.initialize(this);
+
+        //        513372960928869_513374324262066
+        AdView adView = new AdView(this, "513372960928869_513374324262066", AdSize.BANNER_HEIGHT_50);
+        LinearLayout adContainer = findViewById(R.id.banner_container);
+        adContainer.addView(adView);
+        adView.loadAd();
 
         interstitialAd = new InterstitialAd(this, "513372960928869_513374487595383");
         // Create listeners for the Interstitial Ad
@@ -302,7 +239,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
                         .withAdListener(interstitialAdListener)
                         .build());
     }
-
     private void showAdWithDelay() {
         Handler handler = new Handler();
         handler.postDelayed(() -> {
@@ -317,23 +253,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
             // Show the ad
             interstitialAd.show();
         }, 1000 * 60 * 2); // Show the ad after 15 minutes
-    }
-
-    private void setAds() {
-        AdRequest adRequest = new AdRequest.Builder().build();
-
-        com.google.android.gms.ads.interstitial.InterstitialAd.load(this, getString(R.string.test_interstitial_ads_unit_id), adRequest,
-                new InterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull com.google.android.gms.ads.interstitial.InterstitialAd interstitialAd) {
-                        mInterstitialAd = interstitialAd;
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        mInterstitialAd = null;
-                    }
-                });
     }
 
 }
