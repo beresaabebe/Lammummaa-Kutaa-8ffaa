@@ -7,7 +7,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -184,7 +186,11 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private void callAds() {
         AudienceNetworkAds.initialize(this);
 
-        //        513372960928869_513374324262066
+        AdView adView_rect = new AdView(this, "513372960928869_569823628617135", AdSize.RECTANGLE_HEIGHT_250);
+        LinearLayout adContainer_rect = findViewById(R.id.banner_container_rect);
+        adContainer_rect.addView(adView_rect);
+        adView_rect.loadAd();
+
         AdView adView = new AdView(this, "513372960928869_513374324262066", AdSize.BANNER_HEIGHT_50);
         LinearLayout adContainer = findViewById(R.id.banner_container);
         adContainer.addView(adView);

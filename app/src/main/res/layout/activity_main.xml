@@ -22,6 +22,13 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/list_item" />
 
+        <LinearLayout
+            android:id="@+id/banner_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/moreAppsRecycler"
             android:layout_width="match_parent"
@@ -34,11 +41,11 @@
             tools:listitem="@layout/moreapps_list_item" />
 
         <LinearLayout
-            android:id="@+id/banner_container"
+            android:id="@+id/banner_container_rect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:layout_margin="5dp"
+            android:orientation="vertical" />
 
     </LinearLayout>
 
