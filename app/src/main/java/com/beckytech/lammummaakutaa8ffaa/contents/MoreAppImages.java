@@ -46,6 +46,7 @@ public class MoreAppImages {
             R.drawable.ao9,
             R.drawable.ao6,
             R.drawable.bio9,
-            R.drawable.cit10
+            R.drawable.cit10,
+            R.drawable.ic_baseline_read_more_24
     };
 }

@@ -44,6 +44,7 @@ public class MoreAppsName {
             "Grade 9th Afaan Oromoo",
             "Grade 6th Afaan Oromoo",
             "Biology Grade 9th",
-            "Citizenship Education Grade 10th"
+            "Citizenship Education Grade 10th",
+            "Download more apps"
     };
 }

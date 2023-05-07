@@ -44,6 +44,7 @@ public class MoreAppUrl {
             "https://play.google.com/store/apps/details?id=com.beckytech.afaanoromookutaa9ffaa",
             "https://play.google.com/store/apps/details?id=com.beckytech.afaanoromookutaa6ffaaafaan2ffaa",
             "https://play.google.com/store/apps/details?id=com.beckytech.biologygrade9studenttextbook",
-            "https://play.google.com/store/apps/details?id=com.beckytech.citizenshipeducationgrade10"
+            "https://play.google.com/store/apps/details?id=com.beckytech.citizenshipeducationgrade10",
+            "https://play.google.com/store/apps/dev?id=6669279757479011928"
     };
 }

@@ -37,7 +37,7 @@
             android:layout_marginEnd="5dp"
             android:orientation="horizontal"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="3"
+            app:spanCount="5"
             tools:listitem="@layout/moreapps_list_item" />
 
         <LinearLayout
