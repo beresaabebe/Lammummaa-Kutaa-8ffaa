@@ -4,10 +4,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/scrollView_main"
     android:background="@color/white"
+    android:fillViewport="true"
     tools:context=".MainActivity">
 
-    <LinearLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -18,16 +20,33 @@
             android:layout_height="match_parent"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
-            android:nestedScrollingEnabled="true"
+            android:nestedScrollingEnabled="false"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             tools:listitem="@layout/list_item" />
 
         <LinearLayout
-            android:id="@+id/banner_container"
+            android:id="@+id/banner_container_rect"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/recyclerView_main_item"
+            android:layout_margin="10dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent" />
+
+        <TextView
+            android:id="@+id/download_textview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:fontFamily="serif"
+            android:layout_below="@id/banner_container_rect"
+            android:gravity="start"
+            android:padding="10dp"
+            android:text="@string/download_more_apps"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="14sp"
+            android:textStyle="bold" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/moreAppsRecycler"
@@ -35,18 +54,21 @@
             android:layout_height="match_parent"
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            android:nestedScrollingEnabled="false"
+            android:layout_below="@+id/download_textview"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:spanCount="5"
             tools:listitem="@layout/moreapps_list_item" />
 
         <LinearLayout
-            android:id="@+id/banner_container_rect"
+            android:id="@+id/banner_container"
             android:layout_width="match_parent"
+            android:layout_below="@id/moreAppsRecycler"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-    </LinearLayout>
+    </RelativeLayout>
 
 </ScrollView>

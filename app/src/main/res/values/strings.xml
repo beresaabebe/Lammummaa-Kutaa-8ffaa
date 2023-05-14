@@ -19,5 +19,5 @@
     <string name="banner_about_unit_id">ca-app-pub-8504401574247581/6936369123</string>
     <string name="banner_detail_unit_id">ca-app-pub-8504401574247581/6251605974</string>
     <string name="privacy_title">Privacy</string>
-    <!--      ca-app-pub-8504401574247581/8927402404-->
+    <string name="download_now">Download Now</string>
 </resources>

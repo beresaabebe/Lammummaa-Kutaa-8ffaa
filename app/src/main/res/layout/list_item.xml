@@ -18,7 +18,6 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_centerVertical="true"
-            android:background="@drawable/image_bg"
             android:src="@drawable/icon"
             android:scaleType="fitXY"
             android:contentDescription="@string/app_name" />
@@ -27,31 +26,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toEndOf="@id/image"
-            android:layout_marginStart="10dp"
             android:orientation="vertical">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/app_name"
+                android:layout_marginStart="10dp"
                 android:textStyle="bold"
                 android:gravity="start"
                 android:singleLine="true"
                 android:ellipsize="end"
                 android:fontFamily="serif"
                 android:textColor="@color/black"
-                android:textSize="14sp"
+                android:textSize="18sp"
                 android:id="@+id/title"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
                 android:gravity="start"
                 android:text="@string/app_name"
                 android:textStyle="italic"
                 android:fontFamily="serif"
                 android:textColor="@color/black"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:id="@+id/subTitle"/>
 
         </LinearLayout>
