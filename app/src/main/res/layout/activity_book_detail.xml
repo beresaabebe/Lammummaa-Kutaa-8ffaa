@@ -56,7 +56,7 @@
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:text="@string/app_name"
-                android:textColor="#174C7B"
+                android:textColor="@color/white"
                 android:textSize="14sp" />
 
         </LinearLayout>

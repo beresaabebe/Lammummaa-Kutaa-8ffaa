@@ -18,6 +18,10 @@
         android:theme="@style/AppTheme"
         tools:targetApi="31">
         <activity
+            android:name=".activity.MoreAppsActivity"
+            android:hardwareAccelerated="true"
+            android:exported="false" />
+        <activity
             android:name=".activity.PrivacyActivity"
             android:hardwareAccelerated="true"
             android:exported="false" />
@@ -46,6 +50,14 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-8504401574247581~5015932733" />
+
+        <service
+            android:name=".service.PushNotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
