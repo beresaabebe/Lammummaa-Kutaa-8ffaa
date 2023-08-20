@@ -254,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         if (item.getItemId() == R.id.action_update) {
             showAdWithDelay();
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            int lastVersion = pref.getInt("lastVersion", 7);
+            int lastVersion = pref.getInt("lastVersion", 8);
             String url = "https://play.google.com/store/apps/details?id=" + getPackageName();
             if (lastVersion < BuildConfig.VERSION_CODE) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -375,7 +375,8 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
             if (task.isSuccessful()) {
                 reviewInfo = task.getResult();
             } else {
-                Toast.makeText(this, "Review fail to start!", Toast.LENGTH_SHORT).show();
+                Log.d(MainActivity.class.getSimpleName(),"Review fail to start!");
+//                Toast.makeText(this, "Review fail to start!", Toast.LENGTH_SHORT).show();
             }
         });
     }
