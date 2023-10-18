@@ -1,13 +1,13 @@
 package com.beckytech.lammummaakutaa8ffaa;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,20 +27,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.beckytech.lammummaakutaa8ffaa.activity.AboutActivity;
 import com.beckytech.lammummaakutaa8ffaa.activity.BookDetailActivity;
-import com.beckytech.lammummaakutaa8ffaa.activity.MoreAppsActivity;
 import com.beckytech.lammummaakutaa8ffaa.activity.PrivacyActivity;
 import com.beckytech.lammummaakutaa8ffaa.adapter.Adapter;
-import com.beckytech.lammummaakutaa8ffaa.adapter.MoreAppsAdapter;
 import com.beckytech.lammummaakutaa8ffaa.contents.ContentEndPage;
 import com.beckytech.lammummaakutaa8ffaa.contents.ContentStartPage;
-import com.beckytech.lammummaakutaa8ffaa.contents.MoreAppTitle;
-import com.beckytech.lammummaakutaa8ffaa.contents.MoreAppUrl;
-import com.beckytech.lammummaakutaa8ffaa.contents.MoreAppsBgColor;
-import com.beckytech.lammummaakutaa8ffaa.contents.MoreAppsImage;
 import com.beckytech.lammummaakutaa8ffaa.contents.SubTitleContents;
 import com.beckytech.lammummaakutaa8ffaa.contents.TitleContents;
 import com.beckytech.lammummaakutaa8ffaa.model.Model;
-import com.beckytech.lammummaakutaa8ffaa.model.MoreAppsModel;
 import com.facebook.ads.Ad;
 import com.facebook.ads.AdError;
 import com.facebook.ads.AdListener;
@@ -59,7 +52,7 @@ import com.google.android.play.core.tasks.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements Adapter.onBookClicked, MoreAppsAdapter.OnAppClicked {
+public class MainActivity extends AppCompatActivity implements Adapter.onBookClicked{
     InterstitialAd interstitialAd;
     String TAG = MainActivity.class.getSimpleName();
     private List<Object> modelList;
@@ -67,11 +60,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private final SubTitleContents subTitleContent = new SubTitleContents();
     private final ContentStartPage startPage = new ContentStartPage();
     private final ContentEndPage endPage = new ContentEndPage();
-    private final MoreAppsImage image = new MoreAppsImage();
-    private final MoreAppTitle title = new MoreAppTitle();
-    private final MoreAppUrl url = new MoreAppUrl();
-    private final MoreAppsBgColor color = new MoreAppsBgColor();
-    private List<MoreAppsModel> moreAppsModelList;
     private ReviewInfo reviewInfo;
     private ReviewManager manager;
     private NavigationView navigationView;
@@ -91,7 +79,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         toolBarAndDrawerNavigation();
         booksDataRecycler();
         addBanner(modelList);
-        moreAppsRecycler();
         rateReviewInfo();
     }
 
@@ -143,13 +130,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         getData();
         Adapter adapter = new Adapter(modelList, this);
         recyclerView.setAdapter(adapter);
-    }
-
-    private void moreAppsRecycler() {
-        RecyclerView moreAppsRecyclerView = findViewById(R.id.moreAppsRecycler);
-        getMoreApps();
-        MoreAppsAdapter moreAppsAdapter = new MoreAppsAdapter(moreAppsModelList, this, this);
-        moreAppsRecyclerView.setAdapter(moreAppsAdapter);
     }
 
     private void rateReviewInfo() {
@@ -208,15 +188,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         adView.loadAd(adView.buildLoadAdConfig().withAdListener(adListener).build());
     }
 
-    private void getMoreApps() {
-        moreAppsModelList = new ArrayList<>();
-        for (int i = 0; i < title.title.length; i++) {
-            moreAppsModelList.add(new MoreAppsModel(title.title[i],
-                    url.url[i],
-                    image.images[i],
-                    color.color[i]));
-        }
-    }
 
     private void getData() {
         modelList = new ArrayList<>();
@@ -244,7 +215,9 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
         if (item.getItemId() == R.id.action_more_apps) {
             showAdWithDelay();
-            startActivity(new Intent(MainActivity.this, MoreAppsActivity.class));
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(Uri.parse("https://play.google.com/store/apps/dev?id=6669279757479011928"));
+            startActivity(intent);
         }
 
         if (item.getItemId() == R.id.action_share) {
@@ -253,8 +226,8 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
         if (item.getItemId() == R.id.action_update) {
             showAdWithDelay();
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-            int lastVersion = pref.getInt("lastVersion", 8);
+            SharedPreferences pref = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
+            int lastVersion = pref.getInt("lastVersion", 9);
             String url = "https://play.google.com/store/apps/details?id=" + getPackageName();
             if (lastVersion < BuildConfig.VERSION_CODE) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -392,13 +365,4 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         }
     }
 
-    @Override
-    public void clickedApp(MoreAppsModel model) {
-        Intent intent = getPackageManager().getLaunchIntentForPackage(model.getUrl());
-        String url = "http://play.google.com/store/apps/details?id=";
-        if (intent == null) {
-            intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url + model.getUrl()));
-        }
-        startActivity(intent);
-    }
 }

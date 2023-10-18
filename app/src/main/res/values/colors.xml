@@ -8,14 +8,5 @@
     <color name="bg">#FDFDFD</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="eng">#1782c8</color>
-    <color name="gadaa">#a4feff</color>
-    <color name="hawaasa">#004119</color>
-    <color name="herrega">#fec110</color>
     <color name="lam">#ec8d33</color>
-    <color name="ogart">#2e2f8b</color>
-    <color name="amher">#fec104</color>
-    <color name="saa">#0173bc</color>
-    <color name="it">#7096c5</color>
-    <color name="maths">#2F4A98</color>
 </resources>

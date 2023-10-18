@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.beckytech.lammummaakutaa8ffaa">
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -16,11 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:targetApi="31">
-        <activity
-            android:name=".activity.MoreAppsActivity"
-            android:hardwareAccelerated="true"
-            android:exported="false" />
+        tools:targetApi="34">
         <activity
             android:name=".activity.PrivacyActivity"
             android:hardwareAccelerated="true"
@@ -40,6 +37,8 @@
         <activity
             android:name=".activity.SplashActivity"
             android:exported="true"
+            android:noHistory="true"
+            android:launchMode="singleInstance"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
