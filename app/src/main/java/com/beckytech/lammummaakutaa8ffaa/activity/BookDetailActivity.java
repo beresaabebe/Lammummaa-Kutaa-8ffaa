@@ -33,10 +33,11 @@ public class BookDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
-
-        callAds();
-
-        findViewById(R.id.back_book_detail).setOnClickListener(v -> onBackPressed());
+        allMainContents();
+        new Handler().postDelayed(this::callAds, 30000);
+    }
+    private void allMainContents() {
+        findViewById(R.id.back_book_detail).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         Intent intent = getIntent();
         Model model = (Model) intent.getSerializableExtra("data");
@@ -134,29 +135,6 @@ public class BookDetailActivity extends AppCompatActivity {
                         .withAdListener(interstitialAdListener)
                         .build());
     }
-
-    private void showAdWithDelay() {
-        Handler handler = new Handler();
-        handler.postDelayed(() -> {
-            // Check if interstitialAd has been loaded successfully
-            if(interstitialAd == null || !interstitialAd.isAdLoaded()) {
-                return;
-            }
-            // Check if ad is already expired or invalidated, and do not show ad if that is the case. You will not get paid to show an invalidated ad.
-            if(interstitialAd.isAdInvalidated()) {
-                return;
-            }
-            // Show the ad
-            interstitialAd.show();
-        }, 1000 * 60 * 2); // Show the ad after 15 minutes
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        showAdWithDelay();
-    }
-
     @Override
     protected void onDestroy() {
         if (fAdView != null) {

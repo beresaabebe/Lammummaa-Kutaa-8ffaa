@@ -71,15 +71,17 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_drawer);
+        AppRate.app_launched(this);
 
         scrollViewSmooth();
-        callAds();
         activateReviewInfo();
-        AppRate.app_launched(this);
         toolBarAndDrawerNavigation();
         booksDataRecycler();
-        addBanner(modelList);
         rateReviewInfo();
+        new Handler().postDelayed(() -> {
+            addBanner(modelList);
+            callAds();
+        }, 30000);
     }
 
     private void scrollViewSmooth() {
