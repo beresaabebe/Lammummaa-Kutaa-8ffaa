@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -44,10 +43,6 @@ import com.facebook.ads.InterstitialAd;
 import com.facebook.ads.InterstitialAdListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
-import com.google.android.play.core.review.ReviewInfo;
-import com.google.android.play.core.review.ReviewManager;
-import com.google.android.play.core.review.ReviewManagerFactory;
-import com.google.android.play.core.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,9 +55,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private final SubTitleContents subTitleContent = new SubTitleContents();
     private final ContentStartPage startPage = new ContentStartPage();
     private final ContentEndPage endPage = new ContentEndPage();
-    private ReviewInfo reviewInfo;
-    private ReviewManager manager;
-    private NavigationView navigationView;
     public static final int ADS_PER_ITEM = 6;
     private AdView adView;
     private DrawerLayout drawerLayout;
@@ -74,10 +66,8 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         AppRate.app_launched(this);
 
         scrollViewSmooth();
-        activateReviewInfo();
         toolBarAndDrawerNavigation();
         booksDataRecycler();
-        rateReviewInfo();
         new Handler().postDelayed(() -> {
             addBanner(modelList);
             callAds();
@@ -101,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         drawerToggle.getDrawerArrowDrawable().setColor(ContextCompat.getColor(this, R.color.white));
         drawerLayout.addDrawerListener(drawerToggle);
 
-        navigationView = findViewById(R.id.navigationView);
+        NavigationView navigationView = findViewById(R.id.navigationView);
         navigationView.setNavigationItemSelectedListener(item -> {
             MenuOptions(item);
             return true;
@@ -132,16 +122,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         getData();
         Adapter adapter = new Adapter(modelList, this);
         recyclerView.setAdapter(adapter);
-    }
-
-    private void rateReviewInfo() {
-        if (reviewInfo != null) {
-            Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
-            flow.addOnCompleteListener(task -> {
-                Menu menu_rate = navigationView.getMenu();
-                menu_rate.findItem(R.id.action_rate).setVisible(false);
-            });
-        }
     }
 
     private void addBanner(List<Object> list) {
@@ -194,8 +174,8 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private void getData() {
         modelList = new ArrayList<>();
         for (int i = 0; i < titleContents.title.length; i++) {
-            modelList.add(new Model(titleContents.title[i].substring(0, 1).toUpperCase() + "" + titleContents.title[i].substring(1).toLowerCase(),
-                    subTitleContent.subTitle[i].substring(0, 1).toUpperCase() + "" + subTitleContent.subTitle[i].substring(1),
+            modelList.add(new Model(titleContents.title[i].substring(0, 1).toUpperCase() + titleContents.title[i].substring(1).toLowerCase(),
+                    subTitleContent.subTitle[i].substring(0, 1).toUpperCase() + subTitleContent.subTitle[i].substring(1),
                     startPage.pageStart[i],
                     endPage.pageEnd[i]));
         }
@@ -229,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         if (item.getItemId() == R.id.action_update) {
             showAdWithDelay();
             SharedPreferences pref = getSharedPreferences(getPackageName(), Context.MODE_PRIVATE);
-            int lastVersion = pref.getInt("lastVersion", 9);
+            int lastVersion = pref.getInt("lastVersion", BuildConfig.VERSION_CODE);
             String url = "https://play.google.com/store/apps/details?id=" + getPackageName();
             if (lastVersion < BuildConfig.VERSION_CODE) {
                 startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
@@ -251,7 +231,8 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
                     .show();
         }
         if (item.getItemId() == R.id.action_rate) {
-            startReviewFlow();
+            String url = "https://play.google.com/store/apps/details?id="+getPackageName();
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
         }
         if (item.getItemId() == R.id.action_privacy) {
             showAdWithDelay();
@@ -341,30 +322,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
             // Show the ad
             interstitialAd.show();
         }, 1000 * 60 * 2); // Show the ad after 15 minutes
-    }
-
-    void activateReviewInfo() {
-        manager = ReviewManagerFactory.create(this);
-        Task<ReviewInfo> manaInfoTask = manager.requestReviewFlow();
-        manaInfoTask.addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                reviewInfo = task.getResult();
-            } else {
-                Log.d(MainActivity.class.getSimpleName(),"Review fail to start!");
-//                Toast.makeText(this, "Review fail to start!", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    void startReviewFlow() {
-        if (reviewInfo != null) {
-            Task<Void> flow = manager.launchReviewFlow(this, reviewInfo);
-            flow.addOnCompleteListener(task -> {
-                Menu menu_rate = navigationView.getMenu();
-                menu_rate.findItem(R.id.action_rate).setVisible(false);
-                Toast.makeText(this, "Rating is complete!", Toast.LENGTH_SHORT).show();
-            });
-        }
     }
 
 }

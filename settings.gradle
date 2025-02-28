@@ -3,8 +3,7 @@ pluginManagement {
         gradlePluginPortal()
         google()
         mavenCentral()
-        //noinspection JcenterRepositoryObsolete
-        jcenter()
+        maven { url "https://repository.liferay.com/nexus/content/repositories/public/" }
     }
 }
 dependencyResolutionManagement {
@@ -12,8 +11,7 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        //noinspection JcenterRepositoryObsolete
-        jcenter()
+        maven { url "https://repository.liferay.com/nexus/content/repositories/public/" }
     }
 }
 rootProject.name = "Lammummaa Kutaa 8ffaa"
