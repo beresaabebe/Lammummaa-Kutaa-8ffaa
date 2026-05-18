@@ -63,11 +63,13 @@
 
     </RelativeLayout>
 
-    <com.github.barteksc.pdfviewer.PDFView
-        android:id="@+id/pdfView"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/pdf_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/toolbar_Rl" />
+        android:layout_below="@id/toolbar_Rl"
+        android:layout_above="@id/banner_container"
+        android:scrollbars="vertical" />
 
     <LinearLayout
         android:id="@+id/banner_container"

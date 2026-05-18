@@ -1,18 +1,18 @@
 plugins {
-    id 'com.android.application'
-    id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
+    alias libs.plugins.android.application
+    alias libs.plugins.google.gms.google.services
+    alias libs.plugins.google.firebase.crashlytics
 }
 
 android {
-    compileSdk 34
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.beckytech.lammummaakutaa8ffaa"
-        minSdk 21
-        targetSdk 34
-        versionCode 10
-        versionName "1.9"
+        minSdk 23
+        targetSdk 37
+        versionCode 13
+        versionName "2.0.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -35,17 +35,20 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.10.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-    implementation 'com.facebook.android:audience-network-sdk:6.16.0'
-    implementation 'com.google.android.play:core:1.10.3'
-    implementation 'com.google.firebase:firebase-crashlytics:18.6.0'
-    implementation 'com.google.firebase:firebase-analytics:21.5.0'
-    implementation 'com.google.firebase:firebase-messaging:23.3.1'
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    implementation 'com.github.barteksc:android-pdf-viewer:3.2.0-beta.1'
-    implementation 'com.facebook.infer.annotation:infer-annotation:0.18.0'
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.constraintlayout
+    implementation libs.play.services.ads
+    implementation libs.play.review
+    implementation libs.work.runtime
+    implementation libs.sqlite
+    implementation libs.firebase.crashlytics
+    implementation libs.firebase.analytics
+    implementation libs.firebase.messaging
+    implementation libs.lifecycle.process
+    implementation libs.lifecycle.common.java8
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+    implementation libs.photoview
 }

@@ -1,46 +1,52 @@
 package com.beckytech.lammummaakutaa8ffaa.activity;
 
 import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.beckytech.lammummaakutaa8ffaa.R;
+import com.beckytech.lammummaakutaa8ffaa.adapter.PdfAdapter;
 import com.beckytech.lammummaakutaa8ffaa.model.Model;
-import com.facebook.ads.Ad;
-import com.facebook.ads.AdError;
-import com.facebook.ads.AdSize;
-import com.facebook.ads.AdView;
-import com.facebook.ads.AudienceNetworkAds;
-import com.facebook.ads.InterstitialAd;
-import com.facebook.ads.InterstitialAdListener;
-import com.github.barteksc.pdfviewer.PDFView;
-import com.github.barteksc.pdfviewer.scroll.DefaultScrollHandle;
+import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookDetailActivity extends AppCompatActivity {
-    InterstitialAd interstitialAd;
-    private final String TAG = AboutActivity.class.getSimpleName();
-    AdView fAdView;
+    private final String TAG = BookDetailActivity.class.getSimpleName();
+    private PdfAdapter pdfAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
         allMainContents();
-        new Handler().postDelayed(this::callAds, 30000);
+        
+        AdManagerHelper.loadBanner(findViewById(R.id.banner_container), getString(R.string.google_banner_detail_unit_id));
+        new Handler().postDelayed(() -> AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id)), 5000);
+        new Handler().postDelayed(() -> AdManagerHelper.showInterstitial(this), 30000);
     }
+
     private void allMainContents() {
         findViewById(R.id.back_book_detail).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
         Intent intent = getIntent();
         Model model = (Model) intent.getSerializableExtra("data");
+
+        if (model == null) return;
 
         TextView title = findViewById(R.id.title_book_detail);
         title.setSelected(true);
@@ -50,98 +56,49 @@ public class BookDetailActivity extends AppCompatActivity {
         subTitle.setSelected(true);
         subTitle.setText(model.getSubTitle());
 
-        PDFView pdfView = findViewById(R.id.pdfView);
+        RecyclerView recyclerView = findViewById(R.id.pdf_recycler_view);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         int start = model.getStartPage();
         int end = model.getEndPage();
 
         List<Integer> list = new ArrayList<>();
-
         for (int i = start; i <= end; i++) {
             list.add(i);
         }
 
         int[] array = new int[list.size()];
-
-        for (int j = 1; j < array.length; j++) {
+        for (int j = 0; j < array.length; j++) {
             array[j] = list.get(j);
         }
 
-        pdfView.fromAsset("lm8.pdf")
-                .pages(array)
-                .enableSwipe(true)
-                .swipeHorizontal(false)
-                .spacing(10)
-                .enableDoubletap(true)
-                .fitEachPage(true)
-                .scrollHandle(new DefaultScrollHandle(this))
-                .load();
+        try {
+            File file = new File(getCacheDir(), "temp.pdf");
+            if (!file.exists()) {
+                InputStream is = getAssets().open("lm8.pdf");
+                FileOutputStream os = new FileOutputStream(file);
+                byte[] buffer = new byte[1024];
+                int read;
+                while ((read = is.read(buffer)) != -1) {
+                    os.write(buffer, 0, read);
+                }
+                is.close();
+                os.flush();
+                os.close();
+            }
+            
+            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
+            pdfAdapter = new PdfAdapter(pfd, array);
+            recyclerView.setAdapter(pdfAdapter);
+        } catch (IOException e) {
+            Log.e(TAG, "Error loading PDF", e);
+        }
     }
-    private void callAds() {
-        AudienceNetworkAds.initialize(this);
 
-        //        513372960928869_513374324262066
-        AdView adView = new AdView(this, "513372960928869_568930455373119", AdSize.BANNER_HEIGHT_50);
-        LinearLayout adContainer = findViewById(R.id.banner_container);
-        adContainer.addView(adView);
-        adView.loadAd();
-
-        interstitialAd = new InterstitialAd(this, "513372960928869_568930772039754");
-        // Create listeners for the Interstitial Ad
-        InterstitialAdListener interstitialAdListener = new InterstitialAdListener() {
-            @Override
-            public void onInterstitialDisplayed(Ad ad) {
-                // Interstitial ad displayed callback
-                Log.e(TAG, "Interstitial ad displayed.");
-            }
-
-            @Override
-            public void onInterstitialDismissed(Ad ad) {
-                // Interstitial dismissed callback
-                Log.e(TAG, "Interstitial ad dismissed.");
-            }
-
-            @Override
-            public void onError(Ad ad, AdError adError) {
-                // Ad error callback
-                Log.e(TAG, "Interstitial ad failed to load: " + adError.getErrorMessage());
-            }
-
-            @Override
-            public void onAdLoaded(Ad ad) {
-                // Interstitial ad is loaded and ready to be displayed
-                Log.d(TAG, "Interstitial ad is loaded and ready to be displayed!");
-                // Show the ad
-                interstitialAd.show();
-            }
-
-            @Override
-            public void onAdClicked(Ad ad) {
-                // Ad clicked callback
-                Log.d(TAG, "Interstitial ad clicked!");
-            }
-
-            @Override
-            public void onLoggingImpression(Ad ad) {
-                // Ad impression logged callback
-                Log.d(TAG, "Interstitial ad impression logged!");
-            }
-        };
-
-        // For auto play video ads, it's recommended to load the ad
-        // at least 30 seconds before it is shown
-        interstitialAd.loadAd(
-                interstitialAd.buildLoadAdConfig()
-                        .withAdListener(interstitialAdListener)
-                        .build());
-    }
     @Override
     protected void onDestroy() {
-        if (fAdView != null) {
-            fAdView.destroy();
-        }
-        if (interstitialAd != null) {
-            interstitialAd.destroy();
+        if (pdfAdapter != null) {
+            pdfAdapter.close();
         }
         super.onDestroy();
     }
