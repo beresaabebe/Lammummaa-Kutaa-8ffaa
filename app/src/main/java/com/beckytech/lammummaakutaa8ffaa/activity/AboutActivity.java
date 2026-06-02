@@ -1,5 +1,6 @@
 package com.beckytech.lammummaakutaa8ffaa.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import com.beckytech.lammummaakutaa8ffaa.contents.AboutName;
 import com.beckytech.lammummaakutaa8ffaa.contents.AboutUrlContents;
 import com.beckytech.lammummaakutaa8ffaa.model.AboutModel;
 import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
+import com.beckytech.lammummaakutaa8ffaa.service.LocaleHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,11 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
     private final AboutImages images = new AboutImages();
     private final AboutName name = new AboutName();
     private final AboutUrlContents urlContents = new AboutUrlContents();
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +48,11 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
         title.setText(R.string.about_us);
 
         WebView webView = findViewById(R.id.webView);
-        webView.loadUrl("file:///android_asset/about.html");
+        if (LocaleHelper.getLanguage(this).equals("om")) {
+            webView.loadUrl("file:///android_asset/about_om.html");
+        } else {
+            webView.loadUrl("file:///android_asset/about.html");
+        }
 
         TextView version = findViewById(R.id.version_tv);
         version.setText(String.format(Locale.ENGLISH, "Version: %s", BuildConfig.VERSION_NAME));
@@ -62,8 +73,9 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
 
     private void getData() {
         modelList = new ArrayList<>();
-        for (int i = 0; i < name.name.length; i++) {
-            modelList.add(new AboutModel(images.images[i], name.name[i], urlContents.url[i]));
+        String[] names = name.getNames(this);
+        for (int i = 0; i < names.length; i++) {
+            modelList.add(new AboutModel(images.images[i], names[i], urlContents.url[i]));
         }
     }
 

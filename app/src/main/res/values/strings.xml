@@ -25,4 +25,43 @@
     <string name="download_now">Download Now</string>
     <string name="back">Back</string>
     <string name="get_more_grade_8th_app">Get more grade 8th apps</string>
+
+    <string-array name="titles">
+        <item>Civic Virtues</item>
+        <item>State and Government Administration</item>
+        <item>Democracy</item>
+        <item>Constitutionalism</item>
+        <item>Human Rights</item>
+        <item>Conflict Resolution and Peacebuilding</item>
+        <item>Critical Thinking and Problem Solving Skills</item>
+    </string-array>
+
+    <string-array name="subtitles">
+        <item>Chapter 1</item>
+        <item>Chapter 2</item>
+        <item>Chapter 3</item>
+        <item>Chapter 4</item>
+        <item>Chapter 5</item>
+        <item>Chapter 6</item>
+        <item>Chapter 7</item>
+    </string-array>
+
+    <string-array name="about_names">
+        <item>Join Facebook</item>
+        <item>Learn Afaan Oromoo</item>
+        <item>Yoosaad.com</item>
+        <item>Follow us on Facebook</item>
+        <item>Join Telegram</item>
+        <item>Call us</item>
+        <item>SBOO - Oromo Orthodox</item>
+        <item>Subscribe Mezmur Channel</item>
+    </string-array>
+    <string name="change_language">Change Language</string>
+    <string name="exit_msg">Do you want to close?</string>
+    <string name="yes">Yes</string>
+    <string name="cancel">Cancel</string>
+    <string name="rate_msg">If you enjoy using %s, please take a moment to rate it. Thanks for your support!</string>
+    <string name="rate_now">Rate Now</string>
+    <string name="remind_later">Remind me later</string>
+    <string name="no_thanks">No, thanks</string>
 </resources>

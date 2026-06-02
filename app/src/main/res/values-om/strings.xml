@@ -1,0 +1,60 @@
+<resources>
+    <string name="app_name">Lammummaa Kutaa 8ffaa</string>
+    <string name="about_us">Waa\'ee keenya</string>
+    <string name="more_apps">Appilikeeshinii dabalataa</string>
+    <string name="rate">Nu madaala</string>
+    <string name="update">Haaromsi</string>
+    <string name="share">Hiru</string>
+    <string name="exit">Ba\'i</string>
+    <string name="change_style">Haala jijjiiri</string>
+    <string name="website">Weebsaayitii</string>
+    <string name="email">Iimeelii</string>
+    <string name="facebook">Feesbuukii</string>
+    <string name="phone">Bilbila</string>
+    <string name="version">Verjinii - </string>
+
+    <string name="download_more_apps">Appilikeeshinii dabalataa buufadhu</string>
+    <string name="privacy_title">Imaammata dhuunfaa</string>
+    <string name="download_now">Amma buufadhu</string>
+    <string name="back">Duubatti</string>
+    <string name="get_more_grade_8th_app">Appilikeeshinii kutaa 8ffaa dabalataa argadhu</string>
+
+    <string-array name="titles">
+        <item>Gaarummaa</item>
+        <item>Mootummaafi Bulchiinsa Mootummaa</item>
+        <item>Dimookiraasii</item>
+        <item>Heerummaa</item>
+        <item>Mirgoota Namummaa</item>
+        <item>Walitti Bu’iinsa Hiikuufi Nagaa Ijaaruu</item>
+        <item>Dandeettiiwwan Gadfageenyaan Yaaduufi Rakkoo Hiikuu</item>
+    </string-array>
+
+    <string-array name="subtitles">
+        <item>Boqonnaa 1</item>
+        <item>Boqonnaa 2</item>
+        <item>Boqonnaa 3</item>
+        <item>Boqonnaa 4</item>
+        <item>Boqonnaa 5</item>
+        <item>Boqonnaa 6</item>
+        <item>Boqonnaa 7</item>
+    </string-array>
+
+    <string-array name="about_names">
+        <item>Feesbuukii natti dabalamaa</item>
+        <item>Afaan Oromoo Baradhaa</item>
+        <item>Yoosaad.com</item>
+        <item>Feesbuukii irratti nu hordofaa</item>
+        <item>Telegiraamii natti dabalamaa</item>
+        <item>Nuuf bilbilaa</item>
+        <item>SBOO - Ortodooksii Oromoo</item>
+        <item>Mezmur Channel Subscribe godhaa</item>
+    </string-array>
+    <string name="change_language">Afaan Jijjiiri</string>
+    <string name="exit_msg">Cufuu ni barbaaduu?</string>
+    <string name="yes">Eeyyee</string>
+    <string name="cancel">Dhiisi</string>
+    <string name="rate_msg">Yoo itti fayyadamuu %s jaallattan, maaloo yeroo muraasa fudhadhaatii nu madaalaa. Gargaarsa keessaniif galatoomaa!</string>
+    <string name="rate_now">Amma madaali</string>
+    <string name="remind_later">Booda na yaadachisi</string>
+    <string name="no_thanks">Lakki, galatoomi</string>
+</resources>

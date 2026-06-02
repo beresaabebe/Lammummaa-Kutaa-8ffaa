@@ -1,5 +1,6 @@
 package com.beckytech.lammummaakutaa8ffaa.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import com.beckytech.lammummaakutaa8ffaa.R;
 import com.beckytech.lammummaakutaa8ffaa.adapter.PdfAdapter;
 import com.beckytech.lammummaakutaa8ffaa.model.Model;
 import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
+import com.beckytech.lammummaakutaa8ffaa.service.LocaleHelper;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,6 +30,11 @@ import java.util.List;
 public class BookDetailActivity extends AppCompatActivity {
     private final String TAG = BookDetailActivity.class.getSimpleName();
     private PdfAdapter pdfAdapter;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

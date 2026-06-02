@@ -1,5 +1,6 @@
 package com.beckytech.lammummaakutaa8ffaa;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,6 +9,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -26,12 +30,19 @@ import com.beckytech.lammummaakutaa8ffaa.contents.SubTitleContents;
 import com.beckytech.lammummaakutaa8ffaa.contents.TitleContents;
 import com.beckytech.lammummaakutaa8ffaa.model.Model;
 import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
+import com.beckytech.lammummaakutaa8ffaa.service.LocaleHelper;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
+import com.google.android.play.core.appupdate.AppUpdateInfo;
+import com.google.android.play.core.appupdate.AppUpdateManager;
+import com.google.android.play.core.appupdate.AppUpdateManagerFactory;
+import com.google.android.play.core.appupdate.AppUpdateOptions;
+import com.google.android.play.core.install.model.AppUpdateType;
+import com.google.android.play.core.install.model.UpdateAvailability;
 import com.google.android.play.core.review.ReviewInfo;
 import com.google.android.play.core.review.ReviewManager;
 import com.google.android.play.core.review.ReviewManagerFactory;
@@ -50,6 +61,21 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private ReviewManager manager;
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
+    private AppUpdateManager appUpdateManager;
+
+    private final ActivityResultLauncher<IntentSenderRequest> updateLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartIntentSenderForResult(),
+            result -> {
+                if (result.getResultCode() != RESULT_OK) {
+                    Toast.makeText(this, "Update failed or cancelled", Toast.LENGTH_SHORT).show();
+                }
+            }
+    );
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(LocaleHelper.onAttach(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,11 +84,34 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
         AppRate.app_launched(this);
         activateReviewInfo();
+        checkUpdate(false);
         toolBarAndDrawerNavigation();
         booksDataRecycler();
 
         AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id));
         new Handler().postDelayed(() -> AdManagerHelper.showInterstitial(this), 10000);
+    }
+
+    private void checkUpdate(boolean showToastIfNoUpdate) {
+        appUpdateManager = AppUpdateManagerFactory.create(this);
+        Task<AppUpdateInfo> appUpdateInfoTask = appUpdateManager.getAppUpdateInfo();
+        appUpdateInfoTask.addOnSuccessListener(appUpdateInfo -> {
+            if (appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                    && appUpdateInfo.isUpdateTypeAllowed(AppUpdateType.IMMEDIATE)) {
+                try {
+                    appUpdateManager.startUpdateFlowForResult(
+                            appUpdateInfo,
+                            updateLauncher,
+                            AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                if (showToastIfNoUpdate) {
+                    Toast.makeText(this, "App is up to date", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     private void toolBarAndDrawerNavigation() {
@@ -105,10 +154,12 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
     private void getData() {
         modelList = new ArrayList<>();
-        for (int i = 0; i < titleContents.title.length; i++) {
+        String[] titles = titleContents.getTitles(this);
+        String[] subTitles = subTitleContent.getSubTitles(this);
+        for (int i = 0; i < titles.length; i++) {
             modelList.add(new Model(
-                    titleContents.title[i],
-                    subTitleContent.subTitle[i],
+                    titles[i],
+                    subTitles[i],
                     startPage.pageStart[i],
                     endPage.pageEnd[i]));
         }
@@ -143,14 +194,36 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
             shareBtn();
         } else if (id == R.id.action_privacy) {
             startActivity(new Intent(this, PrivacyActivity.class));
+        } else if (id == R.id.action_language) {
+            showLanguageDialog();
+        } else if (id == R.id.action_update) {
+            checkUpdate(true);
         } else if (id == R.id.action_exit) {
             new MaterialAlertDialogBuilder(this)
-                    .setTitle("Exit")
-                    .setMessage("Do you want to close?")
-                    .setPositiveButton("Yes", (dialog, which) -> finish())
-                    .setNegativeButton("Cancel", null)
+                    .setTitle(R.string.exit)
+                    .setMessage(R.string.exit_msg)
+                    .setPositiveButton(R.string.yes, (dialog, which) -> finish())
+                    .setNegativeButton(R.string.cancel, null)
                     .show();
         }
+    }
+
+    private void showLanguageDialog() {
+        String[] languages = {"English", "Afaan Oromoo"};
+        int checkedItem = LocaleHelper.getLanguage(this).equals("om") ? 1 : 0;
+
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.change_language)
+                .setSingleChoiceItems(languages, checkedItem, (dialog, which) -> {
+                    if (which == 0) {
+                        LocaleHelper.setLocale(MainActivity.this, "en");
+                    } else {
+                        LocaleHelper.setLocale(MainActivity.this, "om");
+                    }
+                    dialog.dismiss();
+                    recreate();
+                })
+                .show();
     }
 
     @Override
@@ -177,6 +250,25 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         } else {
             String pkg = getPackageName();
             startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("http://play.google.com/store/apps/details?id=" + pkg)));
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (appUpdateManager != null) {
+            appUpdateManager.getAppUpdateInfo().addOnSuccessListener(appUpdateInfo -> {
+                if (appUpdateInfo.updateAvailability() == UpdateAvailability.DEVELOPER_TRIGGERED_UPDATE_IN_PROGRESS) {
+                    try {
+                        appUpdateManager.startUpdateFlowForResult(
+                                appUpdateInfo,
+                                updateLauncher,
+                                AppUpdateOptions.newBuilder(AppUpdateType.IMMEDIATE).build());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
         }
     }
 }

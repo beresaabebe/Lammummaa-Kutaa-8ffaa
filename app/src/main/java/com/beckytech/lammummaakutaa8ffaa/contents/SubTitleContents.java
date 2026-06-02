@@ -1,13 +1,21 @@
 package com.beckytech.lammummaakutaa8ffaa.contents;
 
+import android.content.Context;
+import com.beckytech.lammummaakutaa8ffaa.R;
+
 public class SubTitleContents {
+    public String[] getSubTitles(Context context) {
+        return context.getResources().getStringArray(R.array.subtitles);
+    }
+
+    // Deprecated
     public String[] subTitle = {
-            "Boqonnaa 1",
-            "Boqonnaa 2",
-            "Boqonnaa 3",
-            "Boqonnaa 4",
-            "Boqonnaa 5",
-            "Boqonnaa 6",
-            "Boqonnaa 7"
+            "Chapter 1",
+            "Chapter 2",
+            "Chapter 3",
+            "Chapter 4",
+            "Chapter 5",
+            "Chapter 6",
+            "Chapter 7"
     };
 }
