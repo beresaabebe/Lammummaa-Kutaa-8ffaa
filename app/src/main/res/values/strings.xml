@@ -19,6 +19,8 @@
     <string name="google_banner_detail_unit_id">ca-app-pub-8504401574247581/6251605974</string>
     <string name="google_app_open_ad_unit_id">ca-app-pub-8504401574247581/8681475889</string>
     <string name="google_native_ads_unit_id">ca-app-pub-8504401574247581/3910120142</string>
+    <string name="google_rewarded_interstitial_ads_unit_id">ca-app-pub-8504401574247581/5497623854</string>
+    <string name="google_rewarded_ads_unit_id">ca-app-pub-8504401574247581/2261086421</string>
 
     <string name="download_more_apps">Download more apps</string>
     <string name="privacy_title">Privacy</string>

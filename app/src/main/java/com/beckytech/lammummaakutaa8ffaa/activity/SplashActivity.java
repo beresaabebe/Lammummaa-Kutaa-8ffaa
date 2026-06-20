@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.beckytech.lammummaakutaa8ffaa.MainActivity;
 import com.beckytech.lammummaakutaa8ffaa.R;
+import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
+import com.beckytech.lammummaakutaa8ffaa.service.AppOpenAdManager;
 import com.beckytech.lammummaakutaa8ffaa.service.LocaleHelper;
 
 @SuppressLint("CustomSplashScreen")
@@ -27,6 +29,14 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        AdManagerHelper.initialize(this, () -> {
+            new AppOpenAdManager(getApplication(), getString(R.string.google_app_open_ad_unit_id));
+            startMain();
+        });
+    }
+
+    private void startMain() {
         new Handler().postDelayed(() -> {
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
             finish();

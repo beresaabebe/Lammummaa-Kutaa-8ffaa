@@ -18,7 +18,7 @@ import java.util.Date;
 
 public class AppOpenAdManager implements DefaultLifecycleObserver, Application.ActivityLifecycleCallbacks {
 
-    private static final String AD_UNIT_ID = "ca-app-pub-8504401574247581/8681475889";
+    private final String adUnitId;
     private AppOpenAd appOpenAd = null;
     private boolean isLoadingAd = false;
     private boolean isShowingAd = false;
@@ -26,8 +26,9 @@ public class AppOpenAdManager implements DefaultLifecycleObserver, Application.A
     private final Application myApplication;
     private Activity currentActivity;
 
-    public AppOpenAdManager(Application application) {
+    public AppOpenAdManager(Application application, String adUnitId) {
         this.myApplication = application;
+        this.adUnitId = adUnitId;
         this.myApplication.registerActivityLifecycleCallbacks(this);
         ProcessLifecycleOwner.get().getLifecycle().addObserver(this);
     }
@@ -39,7 +40,7 @@ public class AppOpenAdManager implements DefaultLifecycleObserver, Application.A
 
         isLoadingAd = true;
         AdRequest request = new AdRequest.Builder().build();
-        AppOpenAd.load(myApplication, AD_UNIT_ID, request,
+        AppOpenAd.load(myApplication, adUnitId, request,
                 new AppOpenAd.AppOpenAdLoadCallback() {
                     @Override
                     public void onAdLoaded(@NonNull AppOpenAd ad) {

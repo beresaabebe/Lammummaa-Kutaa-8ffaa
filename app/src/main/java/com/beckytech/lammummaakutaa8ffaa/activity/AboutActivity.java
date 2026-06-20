@@ -40,7 +40,9 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
 
-        AdManagerHelper.loadBanner(findViewById(R.id.banner_container), getString(R.string.google_banner_about_unit_id));
+        findViewById(R.id.banner_container).post(() -> 
+            AdManagerHelper.loadAdaptiveBanner(this, findViewById(R.id.banner_container), getString(R.string.google_banner_about_unit_id), true)
+        );
         AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id));
 
         findViewById(R.id.ib_back).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());

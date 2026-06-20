@@ -50,6 +50,12 @@ import com.google.android.play.core.review.ReviewManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.android.gms.ads.nativead.NativeAd;
+
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import androidx.appcompat.widget.SearchView;
+
 public class MainActivity extends AppCompatActivity implements Adapter.onBookClicked {
     public static final int ADS_PER_ITEM = 5;
     private final TitleContents titleContents = new TitleContents();
@@ -62,6 +68,8 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
     private AppUpdateManager appUpdateManager;
+    private Adapter adapter;
+    private FirebaseAnalytics mFirebaseAnalytics;
 
     private final ActivityResultLauncher<IntentSenderRequest> updateLauncher = registerForActivityResult(
             new ActivityResultContracts.StartIntentSenderForResult(),
@@ -82,14 +90,35 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_drawer);
 
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         AppRate.app_launched(this);
         activateReviewInfo();
         checkUpdate(false);
         toolBarAndDrawerNavigation();
         booksDataRecycler();
+        setupSearchView();
 
         AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id));
+        AdManagerHelper.loadRewardedInterstitial(this, getString(R.string.google_rewarded_interstitial_ads_unit_id));
         new Handler().postDelayed(() -> AdManagerHelper.showInterstitial(this), 10000);
+    }
+
+    private void setupSearchView() {
+        SearchView searchView = findViewById(R.id.searchView);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (adapter != null) {
+                    adapter.filter(newText);
+                }
+                return true;
+            }
+        });
     }
 
     private void checkUpdate(boolean showToastIfNoUpdate) {
@@ -147,9 +176,9 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private void booksDataRecycler() {
         RecyclerView recyclerView = findViewById(R.id.recyclerView_main_item);
         getData();
-        insertAds();
-        Adapter adapter = new Adapter(modelList, this);
+        adapter = new Adapter(modelList, this);
         recyclerView.setAdapter(adapter);
+        insertAds();
     }
 
     private void getData() {
@@ -166,17 +195,28 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     }
 
     private void insertAds() {
-        java.util.Random random = new java.util.Random();
         for (int i = ADS_PER_ITEM; i <= modelList.size(); i += ADS_PER_ITEM + 1) {
-            AdView adView = new AdView(this);
-            adView.setAdUnitId(getString(R.string.google_banner_ad_unit_id_main));
-            if (random.nextBoolean()) {
-                adView.setAdSize(AdSize.BANNER);
-            } else {
-                adView.setAdSize(AdSize.MEDIUM_RECTANGLE);
-            }
-            adView.loadAd(new AdRequest.Builder().build());
-            modelList.add(i, adView);
+            final int index = i;
+            modelList.add(index, "SHIMMER");
+            adapter.notifyItemInserted(index);
+            AdManagerHelper.loadNativeAd(this, getString(R.string.google_native_ads_unit_id), new AdManagerHelper.NativeAdListener() {
+                @Override
+                public void onNativeAdLoaded(NativeAd nativeAd) {
+                    modelList.set(index, nativeAd);
+                    adapter.notifyItemChanged(index);
+                }
+
+                @Override
+                public void onNativeAdFailed() {
+                    // Fallback to banner if native fails
+                    AdView adView = new AdView(MainActivity.this);
+                    adView.setAdUnitId(getString(R.string.google_banner_ad_unit_id_main));
+                    adView.setAdSize(AdSize.BANNER);
+                    adView.loadAd(new AdRequest.Builder().build());
+                    modelList.set(index, adView);
+                    adapter.notifyItemChanged(index);
+                }
+            });
         }
     }
 
@@ -228,7 +268,19 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
 
     @Override
     public void clickedBook(Model model) {
-        AdManagerHelper.showInterstitial(this);
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, model.getTitle());
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, model.getTitle());
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "chapter");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
+
+        if (new java.util.Random().nextInt(3) == 0) {
+            AdManagerHelper.showRewardedInterstitial(this);
+            AdManagerHelper.loadRewardedInterstitial(this, getString(R.string.google_rewarded_interstitial_ads_unit_id));
+        } else {
+            AdManagerHelper.showInterstitial(this);
+            AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id));
+        }
         startActivity(new Intent(this, BookDetailActivity.class).putExtra("data", model));
     }
 

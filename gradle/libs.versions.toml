@@ -11,6 +11,7 @@ firebase-analytics = "23.2.0"
 firebase-crashlytics = "20.0.6"
 firebase-crashlytics-gradle = "3.0.7"
 firebase-messaging = "25.0.2"
+firebase-config = "22.1.0"
 google-firebase-crashlytics = "3.0.7"
 google-gms-google-services = "4.4.4"
 google-services = "4.4.4"
@@ -21,6 +22,8 @@ lifecycle = "2.10.0"
 material = "1.14.0"
 photoview = "2.3.0"
 play-services-ads = "25.2.0"
+user-messaging-platform = "3.1.0"
+shimmer = "0.5.0"
 
 [libraries]
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -35,6 +38,7 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebase-crashlytics" }
 firebase-crashlytics-gradle = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "firebase-crashlytics-gradle" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebase-messaging" }
+firebase-config = { group = "com.google.firebase", name = "firebase-config", version.ref = "firebase-config" }
 google-services = { group = "com.google.gms", name = "google-services", version.ref = "google-services" }
 gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "gradle" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -43,6 +47,8 @@ lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", 
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 photoview = { group = "com.github.chrisbanes", name = "PhotoView", version.ref = "photoview" }
 play-services-ads = { group = "com.google.android.gms", name = "play-services-ads", version.ref = "play-services-ads" }
+user-messaging-platform = { group = "com.google.android.ump", name = "user-messaging-platform", version.ref = "user-messaging-platform" }
+shimmer = { group = "com.facebook.shimmer", name = "shimmer", version.ref = "shimmer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

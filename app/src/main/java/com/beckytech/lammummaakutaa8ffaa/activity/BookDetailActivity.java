@@ -27,9 +27,19 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
+
+import com.google.android.play.core.review.ReviewInfo;
+import com.google.android.play.core.review.ReviewManager;
+import com.google.android.play.core.review.ReviewManagerFactory;
+import com.google.android.gms.tasks.Task;
+
 public class BookDetailActivity extends AppCompatActivity {
     private final String TAG = BookDetailActivity.class.getSimpleName();
     private PdfAdapter pdfAdapter;
+    private FirebaseAnalytics mFirebaseAnalytics;
+    private ReviewManager reviewManager;
+    private ReviewInfo reviewInfo;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -40,15 +50,45 @@ public class BookDetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        initReviewManager();
         allMainContents();
         
-        AdManagerHelper.loadBanner(findViewById(R.id.banner_container), getString(R.string.google_banner_detail_unit_id));
+        findViewById(R.id.banner_container).post(() -> 
+            AdManagerHelper.loadAdaptiveBanner(this, findViewById(R.id.banner_container), getString(R.string.google_banner_detail_unit_id), true)
+        );
         new Handler().postDelayed(() -> AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id)), 5000);
         new Handler().postDelayed(() -> AdManagerHelper.showInterstitial(this), 30000);
     }
 
+    private void initReviewManager() {
+        reviewManager = ReviewManagerFactory.create(this);
+        Task<ReviewInfo> request = reviewManager.requestReviewFlow();
+        request.addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                reviewInfo = task.getResult();
+            }
+        });
+    }
+
+    private void showReviewFlow() {
+        if (reviewInfo != null) {
+            reviewManager.launchReviewFlow(this, reviewInfo);
+        }
+    }
+
+    private void shareApp() {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        String url = "https://play.google.com/store/apps/details?id=" + getPackageName();
+        intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.app_name));
+        intent.putExtra(Intent.EXTRA_TEXT, "Read " + getString(R.string.app_name) + " on Play store \n" + url);
+        startActivity(Intent.createChooser(intent, "Share via"));
+    }
+
     private void allMainContents() {
         findViewById(R.id.back_book_detail).setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+        findViewById(R.id.share_book_detail).setOnClickListener(v -> shareApp());
 
         Intent intent = getIntent();
         Model model = (Model) intent.getSerializableExtra("data");
@@ -95,7 +135,11 @@ public class BookDetailActivity extends AppCompatActivity {
             }
             
             ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-            pdfAdapter = new PdfAdapter(pfd, array);
+            pdfAdapter = new PdfAdapter(pfd, array, count -> {
+                if (count == 5) {
+                    showReviewFlow();
+                }
+            });
             recyclerView.setAdapter(pdfAdapter);
         } catch (IOException e) {
             Log.e(TAG, "Error loading PDF", e);

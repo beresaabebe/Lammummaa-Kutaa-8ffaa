@@ -12,7 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
+        android:background="@color/white"
         android:orientation="horizontal"
         android:padding="12dp">
 
@@ -47,7 +47,7 @@
                 android:ellipsize="end"
                 android:fontFamily="sans-serif-medium"
                 android:maxLines="1"
-                android:textColor="@color/white"
+                android:textColor="@color/black"
                 android:textSize="18sp" />
 
             <TextView

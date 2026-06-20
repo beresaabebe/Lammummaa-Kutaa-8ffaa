@@ -11,8 +11,8 @@ android {
         applicationId "com.beckytech.lammummaakutaa8ffaa"
         minSdk 23
         targetSdk 37
-        versionCode 14
-        versionName "2.0.3"
+        versionCode 15
+        versionName "2.0.4"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,6 +39,8 @@ dependencies {
     implementation libs.material
     implementation libs.constraintlayout
     implementation libs.play.services.ads
+    implementation libs.user.messaging.platform
+    implementation libs.shimmer
     implementation libs.play.review
     implementation libs.play.app.update
     implementation libs.work.runtime
@@ -46,6 +48,7 @@ dependencies {
     implementation libs.firebase.crashlytics
     implementation libs.firebase.analytics
     implementation libs.firebase.messaging
+    implementation libs.firebase.config
     implementation libs.lifecycle.process
     implementation libs.lifecycle.common.java8
     testImplementation libs.junit

@@ -16,8 +16,6 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        AdManagerHelper.initialize(this);
-        new AppOpenAdManager(this);
     }
 }
 
