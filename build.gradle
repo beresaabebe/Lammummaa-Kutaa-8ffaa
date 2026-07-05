@@ -6,6 +6,6 @@ plugins {
     alias libs.plugins.google.firebase.crashlytics apply false
 }
 
-task clean(type: Delete) {
+tasks.register('clean', Delete) {
     delete rootProject.buildDir
 }

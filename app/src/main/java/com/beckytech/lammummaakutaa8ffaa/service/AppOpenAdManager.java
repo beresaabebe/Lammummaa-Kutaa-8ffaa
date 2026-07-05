@@ -10,6 +10,7 @@ import androidx.lifecycle.DefaultLifecycleObserver;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ProcessLifecycleOwner;
 
+import com.beckytech.lammummaakutaa8ffaa.activity.SplashActivity;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.appopen.AppOpenAd;
@@ -57,29 +58,38 @@ public class AppOpenAdManager implements DefaultLifecycleObserver, Application.A
     }
 
     public void showAdIfAvailable() {
-        if (!isShowingAd && isAdAvailable()) {
-            appOpenAd.setFullScreenContentCallback(new com.google.android.gms.ads.FullScreenContentCallback() {
-                @Override
-                public void onAdDismissedFullScreenContent() {
-                    appOpenAd = null;
-                    isShowingAd = false;
-                    fetchAd();
-                }
-
-                @Override
-                public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
-                    isShowingAd = false;
-                }
-
-                @Override
-                public void onAdShowedFullScreenContent() {
-                    isShowingAd = true;
-                }
-            });
-            appOpenAd.show(currentActivity);
-        } else {
-            fetchAd();
+        if (isShowingAd) {
+            return;
         }
+
+        if (!isAdAvailable()) {
+            fetchAd();
+            return;
+        }
+
+        if (currentActivity instanceof SplashActivity) {
+            return;
+        }
+
+        appOpenAd.setFullScreenContentCallback(new com.google.android.gms.ads.FullScreenContentCallback() {
+            @Override
+            public void onAdDismissedFullScreenContent() {
+                appOpenAd = null;
+                isShowingAd = false;
+                fetchAd();
+            }
+
+            @Override
+            public void onAdFailedToShowFullScreenContent(@NonNull com.google.android.gms.ads.AdError adError) {
+                isShowingAd = false;
+            }
+
+            @Override
+            public void onAdShowedFullScreenContent() {
+                isShowingAd = true;
+            }
+        });
+        appOpenAd.show(currentActivity);
     }
 
     private boolean isAdAvailable() {

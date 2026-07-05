@@ -11,8 +11,8 @@ android {
         applicationId "com.beckytech.lammummaakutaa8ffaa"
         minSdk 23
         targetSdk 37
-        versionCode 15
-        versionName "2.0.4"
+        versionCode 16
+        versionName "2.0.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -24,8 +24,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
     }
     namespace 'com.beckytech.lammummaakutaa8ffaa'
 
@@ -39,12 +39,15 @@ dependencies {
     implementation libs.material
     implementation libs.constraintlayout
     implementation libs.play.services.ads
+    implementation libs.facebook.mediation
+    implementation libs.unity.mediation
     implementation libs.user.messaging.platform
     implementation libs.shimmer
     implementation libs.play.review
     implementation libs.play.app.update
     implementation libs.work.runtime
     implementation libs.sqlite
+    implementation platform(libs.firebase.bom)
     implementation libs.firebase.crashlytics
     implementation libs.firebase.analytics
     implementation libs.firebase.messaging

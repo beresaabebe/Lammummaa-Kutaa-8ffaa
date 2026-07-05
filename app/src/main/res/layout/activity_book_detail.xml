@@ -75,13 +75,12 @@
 
     </RelativeLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/pdf_recycler_view"
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/viewPager"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/toolbar_Rl"
-        android:layout_above="@id/banner_container"
-        android:scrollbars="vertical" />
+        android:layout_above="@id/banner_container" />
 
     <LinearLayout
         android:id="@+id/banner_container"

@@ -11,35 +11,49 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.beckytech.lammummaakutaa8ffaa.R;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.util.Objects;
-
-@SuppressLint("MissingFirebaseInstanceTokenRefresh")
 public class PushNotificationService extends FirebaseMessagingService {
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onMessageReceived(@NonNull RemoteMessage remoteMessage) {
-        String title = Objects.requireNonNull(remoteMessage.getNotification()).getTitle();
-        String message = remoteMessage.getNotification().getBody();
+        String title = "";
+        String message = "";
+
+        if (remoteMessage.getNotification() != null) {
+            title = remoteMessage.getNotification().getTitle();
+            message = remoteMessage.getNotification().getBody();
+        } else if (!remoteMessage.getData().isEmpty()) {
+            title = remoteMessage.getData().get("title");
+            message = remoteMessage.getData().get("message");
+        }
+
+        if (title == null || title.isEmpty()) return;
+
         final String CHANNEL_ID = "HEADS_UP_CHANNEL";
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                "Heads up notification", NotificationManager.IMPORTANCE_HIGH);
-        getSystemService(NotificationManager.class).createNotificationChannel(channel);
-        Notification.Builder notification = new Notification.Builder(this, CHANNEL_ID)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    "Heads up notification", NotificationManager.IMPORTANCE_HIGH);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) manager.createNotificationChannel(channel);
+        }
+        
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setAutoCancel(true);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            return;
+                
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
         }
-        NotificationManagerCompat.from(this).notify(1, notification.build());
-
-        super.onMessageReceived(remoteMessage);
+        NotificationManagerCompat.from(this).notify(new java.util.Random().nextInt(), notification.build());
     }
 }

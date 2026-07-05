@@ -2,44 +2,33 @@ package com.beckytech.lammummaakutaa8ffaa.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.ParcelFileDescriptor;
-import android.util.Log;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.beckytech.lammummaakutaa8ffaa.R;
-import com.beckytech.lammummaakutaa8ffaa.adapter.PdfAdapter;
 import com.beckytech.lammummaakutaa8ffaa.model.Model;
 import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
 import com.beckytech.lammummaakutaa8ffaa.service.LocaleHelper;
+import com.beckytech.lammummaakutaa8ffaa.contents.ContentEndPage;
+import com.beckytech.lammummaakutaa8ffaa.contents.ContentStartPage;
+import com.beckytech.lammummaakutaa8ffaa.contents.SubTitleContents;
+import com.beckytech.lammummaakutaa8ffaa.contents.TitleContents;
+import com.google.firebase.analytics.FirebaseAnalytics;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.firebase.analytics.FirebaseAnalytics;
-
-import com.google.android.play.core.review.ReviewInfo;
-import com.google.android.play.core.review.ReviewManager;
-import com.google.android.play.core.review.ReviewManagerFactory;
-import com.google.android.gms.tasks.Task;
-
 public class BookDetailActivity extends AppCompatActivity {
     private final String TAG = BookDetailActivity.class.getSimpleName();
-    private PdfAdapter pdfAdapter;
     private FirebaseAnalytics mFirebaseAnalytics;
-    private ReviewManager reviewManager;
-    private ReviewInfo reviewInfo;
+    private ViewPager2 viewPager;
+    private List<Model> modelList;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -51,30 +40,13 @@ public class BookDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
-        initReviewManager();
+        
         allMainContents();
         
         findViewById(R.id.banner_container).post(() -> 
             AdManagerHelper.loadAdaptiveBanner(this, findViewById(R.id.banner_container), getString(R.string.google_banner_detail_unit_id), true)
         );
         new Handler().postDelayed(() -> AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id)), 5000);
-        new Handler().postDelayed(() -> AdManagerHelper.showInterstitial(this), 30000);
-    }
-
-    private void initReviewManager() {
-        reviewManager = ReviewManagerFactory.create(this);
-        Task<ReviewInfo> request = reviewManager.requestReviewFlow();
-        request.addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                reviewInfo = task.getResult();
-            }
-        });
-    }
-
-    private void showReviewFlow() {
-        if (reviewInfo != null) {
-            reviewManager.launchReviewFlow(this, reviewInfo);
-        }
     }
 
     private void shareApp() {
@@ -91,66 +63,74 @@ public class BookDetailActivity extends AppCompatActivity {
         findViewById(R.id.share_book_detail).setOnClickListener(v -> shareApp());
 
         Intent intent = getIntent();
-        Model model = (Model) intent.getSerializableExtra("data");
+        Model currentModel = (Model) intent.getSerializableExtra("data");
 
-        if (model == null) return;
+        if (currentModel == null) return;
 
         TextView title = findViewById(R.id.title_book_detail);
         title.setSelected(true);
-        title.setText(model.getTitle());
 
         TextView subTitle = findViewById(R.id.sub_title_book_detail);
         subTitle.setSelected(true);
-        subTitle.setText(model.getSubTitle());
 
-        RecyclerView recyclerView = findViewById(R.id.pdf_recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        getData();
 
-        int start = model.getStartPage();
-        int end = model.getEndPage();
-
-        List<Integer> list = new ArrayList<>();
-        for (int i = start; i <= end; i++) {
-            list.add(i);
-        }
-
-        int[] array = new int[list.size()];
-        for (int j = 0; j < array.length; j++) {
-            array[j] = list.get(j);
-        }
-
-        try {
-            File file = new File(getCacheDir(), "temp.pdf");
-            if (!file.exists()) {
-                InputStream is = getAssets().open("lm8.pdf");
-                FileOutputStream os = new FileOutputStream(file);
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = is.read(buffer)) != -1) {
-                    os.write(buffer, 0, read);
-                }
-                is.close();
-                os.flush();
-                os.close();
+        viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new FragmentStateAdapter(this) {
+            @NonNull
+            @Override
+            public androidx.fragment.app.Fragment createFragment(int position) {
+                return ChapterFragment.newInstance(modelList.get(position));
             }
-            
-            ParcelFileDescriptor pfd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-            pdfAdapter = new PdfAdapter(pfd, array, count -> {
-                if (count == 5) {
-                    showReviewFlow();
-                }
-            });
-            recyclerView.setAdapter(pdfAdapter);
-        } catch (IOException e) {
-            Log.e(TAG, "Error loading PDF", e);
+
+            @Override
+            public int getItemCount() {
+                return modelList.size();
+            }
+        });
+
+        int currentPos = 0;
+        for (int i = 0; i < modelList.size(); i++) {
+            if (modelList.get(i).getTitle().equals(currentModel.getTitle())) {
+                currentPos = i;
+                break;
+            }
         }
+        viewPager.setCurrentItem(currentPos, false);
+        title.setText(modelList.get(currentPos).getTitle());
+        subTitle.setText(modelList.get(currentPos).getSubTitle());
+
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                title.setText(modelList.get(position).getTitle());
+                subTitle.setText(modelList.get(position).getSubTitle());
+                
+                AdManagerHelper.showRandomRewardedAd(BookDetailActivity.this, 
+                        getString(R.string.google_rewarded_ads_unit_id),
+                        getString(R.string.google_rewarded_interstitial_ads_unit_id),
+                        getString(R.string.google_interstitial_ads_unit_id));
+            }
+        });
     }
 
-    @Override
-    protected void onDestroy() {
-        if (pdfAdapter != null) {
-            pdfAdapter.close();
+    private void getData() {
+        modelList = new ArrayList<>();
+        TitleContents titleContents = new TitleContents();
+        SubTitleContents subTitleContent = new SubTitleContents();
+        ContentStartPage startPage = new ContentStartPage();
+        ContentEndPage endPage = new ContentEndPage();
+        
+        String[] titles = titleContents.getTitles(this);
+        String[] subTitles = subTitleContent.getSubTitles(this);
+        for (int i = 0; i < titles.length; i++) {
+            modelList.add(new Model(
+                    titles[i],
+                    subTitles[i],
+                    startPage.pageStart[i],
+                    endPage.pageEnd[i]));
         }
-        super.onDestroy();
     }
 }
+

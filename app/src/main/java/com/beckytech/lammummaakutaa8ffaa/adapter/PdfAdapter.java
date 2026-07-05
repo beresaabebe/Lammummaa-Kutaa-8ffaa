@@ -21,6 +21,9 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdSize;
+import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 
@@ -35,7 +38,7 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_PAGE = 0;
     private static final int TYPE_AD = 1;
-    private static final int AD_INTERVAL = 8;
+    private static final int AD_INTERVAL = 4;
 
     private final ParcelFileDescriptor fileDescriptor;
     private final PdfRenderer pdfRenderer;
@@ -145,8 +148,13 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
             @Override
             public void onNativeAdFailed() {
-                items.remove(position);
-                notifyItemRemoved(position);
+                // Fallback to banner
+                AdView adView = new AdView(context);
+                adView.setAdUnitId(context.getString(R.string.google_banner_ad_unit_id_main));
+                adView.setAdSize(AdSize.BANNER);
+                adView.loadAd(new AdRequest.Builder().build());
+                items.set(position, adView);
+                notifyItemChanged(position);
             }
         });
     }

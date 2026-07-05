@@ -30,10 +30,7 @@ public class SplashActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        AdManagerHelper.initialize(this, () -> {
-            new AppOpenAdManager(getApplication(), getString(R.string.google_app_open_ad_unit_id));
-            startMain();
-        });
+        AdManagerHelper.initialize(this, this::startMain);
     }
 
     private void startMain() {

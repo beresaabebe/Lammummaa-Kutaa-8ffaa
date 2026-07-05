@@ -8,31 +8,32 @@ import androidx.annotation.NonNull;
 
 import android.os.Bundle;
 
+import com.beckytech.lammummaakutaa8ffaa.R;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.FullScreenContentCallback;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdOptions;
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAd;
-import com.google.android.gms.ads.rewardedinterstitial.RewardedInterstitialAdLoadCallback;
 import com.google.android.gms.ads.interstitial.InterstitialAd;
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
 import com.google.android.ump.ConsentInformation;
 import com.google.android.ump.UserMessagingPlatform;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AdManagerHelper {
 
     private static InterstitialAd mInterstitialAd;
-    private static RewardedInterstitialAd mRewardedInterstitialAd;
-    private static int clickCount = 0;
     private static int clickThreshold = 3;
     private static int adInterval = 8;
     private static final AtomicBoolean isMobileAdsInitializeCalled = new AtomicBoolean(false);
+    private static final AtomicBoolean isMobileAdsInitialized = new AtomicBoolean(false);
+    private static final List<Runnable> initCallbacks = new ArrayList<>();
     private static ConsentInformation consentInformation;
 
     public static void initialize(Activity activity, Runnable onInitComplete) {
@@ -46,18 +47,26 @@ public class AdManagerHelper {
                         loadAndShowError -> {
                             if (consentInformation.canRequestAds()) {
                                 startMobileAdsSdk(activity, onInitComplete);
+                            } else {
+                                if (onInitComplete != null) onInitComplete.run();
                             }
                         }
                 ),
                 requestConsentError -> {
                     if (consentInformation.canRequestAds()) {
                         startMobileAdsSdk(activity, onInitComplete);
+                    } else {
+                        if (onInitComplete != null) onInitComplete.run();
                     }
                 });
 
         if (consentInformation.canRequestAds()) {
             startMobileAdsSdk(activity, onInitComplete);
         }
+    }
+
+    public static void initMobileAds(Context context, Runnable onInitComplete) {
+        startMobileAdsSdk(context, onInitComplete);
     }
 
     private static void setupRemoteConfig() {
@@ -83,11 +92,29 @@ public class AdManagerHelper {
     }
 
     private static void startMobileAdsSdk(Context context, Runnable onInitComplete) {
-        if (isMobileAdsInitializeCalled.getAndSet(true)) {
-            return;
+        synchronized (initCallbacks) {
+            if (isMobileAdsInitialized.get()) {
+                if (onInitComplete != null) onInitComplete.run();
+                return;
+            }
+            
+            if (onInitComplete != null) {
+                initCallbacks.add(onInitComplete);
+            }
+            
+            if (isMobileAdsInitializeCalled.getAndSet(true)) {
+                return;
+            }
         }
+
         MobileAds.initialize(context, initializationStatus -> {
-            if (onInitComplete != null) onInitComplete.run();
+            isMobileAdsInitialized.set(true);
+            synchronized (initCallbacks) {
+                for (Runnable callback : initCallbacks) {
+                    callback.run();
+                }
+                initCallbacks.clear();
+            }
         });
     }
 
@@ -106,6 +133,14 @@ public class AdManagerHelper {
             extras.putString("collapsible", "bottom");
             builder.addNetworkExtrasBundle(com.google.ads.mediation.admob.AdMobAdapter.class, extras);
         }
+        
+        adView.setAdListener(new com.google.android.gms.ads.AdListener() {
+            @Override
+            public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
+                // Potential fallback to a standard unit could be added here
+            }
+        });
+        
         adView.loadAd(builder.build());
     }
 
@@ -131,44 +166,44 @@ public class AdManagerHelper {
                     @Override
                     public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
                         mInterstitialAd = null;
+                        // Fallback to the main interstitial unit if a specific one fails
+                        String fallbackId = activity.getString(R.string.google_interstitial_ads_unit_id);
+                        if (!Objects.equals(adUnitId, fallbackId)) {
+                            AdRequest fallbackRequest = new AdRequest.Builder().build();
+                            InterstitialAd.load(activity, fallbackId, fallbackRequest, new InterstitialAdLoadCallback() {
+                                @Override
+                                public void onAdLoaded(@NonNull InterstitialAd interstitialAd) {
+                                    mInterstitialAd = interstitialAd;
+                                }
+                            });
+                        }
                     }
                 });
     }
 
     public static void showInterstitial(Activity activity) {
-        clickCount++;
-        if (clickCount >= clickThreshold) {
-            if (mInterstitialAd != null) {
-                mInterstitialAd.show(activity);
-                mInterstitialAd = null;
-                clickCount = 0;
-            }
+        if (mInterstitialAd != null) {
+            mInterstitialAd.show(activity);
+            mInterstitialAd = null;
         }
-    }
-
-    public static void loadRewardedInterstitial(Activity activity, String adUnitId) {
-        AdRequest adRequest = new AdRequest.Builder().build();
-        RewardedInterstitialAd.load(activity, adUnitId, adRequest,
-                new RewardedInterstitialAdLoadCallback() {
-                    @Override
-                    public void onAdLoaded(@NonNull RewardedInterstitialAd rewardedInterstitialAd) {
-                        mRewardedInterstitialAd = rewardedInterstitialAd;
-                    }
-
-                    @Override
-                    public void onAdFailedToLoad(@NonNull LoadAdError loadAdError) {
-                        mRewardedInterstitialAd = null;
-                    }
-                });
     }
 
     public static void showRewardedInterstitial(Activity activity) {
-        if (mRewardedInterstitialAd != null) {
-            mRewardedInterstitialAd.show(activity, rewardItem -> {
-                // Handle reward
-            });
-            mRewardedInterstitialAd = null;
-        }
+        showInterstitial(activity);
+    }
+
+    public static void loadRewardedInterstitial(Activity activity, String adUnitId) {
+        loadInterstitial(activity, adUnitId);
+    }
+
+    public static void loadRewardedAd(Activity activity, String adUnitId) {
+        loadInterstitial(activity, adUnitId);
+    }
+
+    public static void showRandomRewardedAd(Activity activity, String rewardedId, String rewardedInterstitialId, String interstitialId) {
+        showInterstitial(activity);
+        // Reload main interstitial
+        loadInterstitial(activity, interstitialId);
     }
 
     public interface NativeAdListener {

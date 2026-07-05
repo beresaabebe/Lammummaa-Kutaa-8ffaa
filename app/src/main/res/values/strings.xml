@@ -13,14 +13,15 @@
     <string name="phone">Phone</string>
     <string name="version">Version - </string>
 
-    <string name="google_banner_ad_unit_id_main">ca-app-pub-8504401574247581/5634710646</string>
-    <string name="google_interstitial_ads_unit_id">ca-app-pub-8504401574247581/7044960588</string>
-    <string name="google_banner_about_unit_id">ca-app-pub-8504401574247581/6936369123</string>
-    <string name="google_banner_detail_unit_id">ca-app-pub-8504401574247581/6251605974</string>
-    <string name="google_app_open_ad_unit_id">ca-app-pub-8504401574247581/8681475889</string>
-    <string name="google_native_ads_unit_id">ca-app-pub-8504401574247581/3910120142</string>
-    <string name="google_rewarded_interstitial_ads_unit_id">ca-app-pub-8504401574247581/5497623854</string>
-    <string name="google_rewarded_ads_unit_id">ca-app-pub-8504401574247581/2261086421</string>
+    <string name="google_banner_ad_unit_id" translatable="false">ca-app-pub-8504401574247581/6936369123</string>
+    <string name="google_banner_ad_unit_id_main" translatable="false">ca-app-pub-8504401574247581/5634710646</string>
+    <string name="google_interstitial_ads_unit_id" translatable="false">ca-app-pub-8504401574247581/7044960588</string>
+    <string name="google_banner_detail_unit_id" translatable="false">ca-app-pub-8504401574247581/6251605974</string>
+    <string name="google_banner_about_unit_id" translatable="false">ca-app-pub-8504401574247581/6936369123</string>
+    <string name="google_app_open_ads_unit_id" translatable="false">ca-app-pub-8504401574247581/8681475889</string>
+    <string name="google_native_ads_unit_id" translatable="false">ca-app-pub-8504401574247581/3910120142</string>
+    <string name="google_rewarded_interstitial_ads_unit_id" translatable="false">ca-app-pub-8504401574247581/5497623854</string>
+    <string name="google_rewarded_ads_unit_id" translatable="false">ca-app-pub-8504401574247581/2261086421</string>
 
     <string name="download_more_apps">Download more apps</string>
     <string name="privacy_title">Privacy</string>
