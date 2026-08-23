@@ -11,8 +11,8 @@ android {
         applicationId "com.beckytech.lammummaakutaa8ffaa"
         minSdk 23
         targetSdk 37
-        versionCode 17
-        versionName "2.0.6"
+        versionCode 19
+        versionName "2.0.8"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
