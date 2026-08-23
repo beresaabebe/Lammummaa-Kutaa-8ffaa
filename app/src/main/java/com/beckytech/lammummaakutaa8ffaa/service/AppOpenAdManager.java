@@ -15,6 +15,7 @@ import com.beckytech.lammummaakutaa8ffaa.activity.SplashActivity;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.appopen.AppOpenAd;
+import com.vungle.ads.AdConfig;
 import com.vungle.ads.BaseAd;
 import com.vungle.ads.VungleError;
 import com.vungle.ads.InterstitialAdListener;
@@ -77,8 +78,26 @@ public class AppOpenAdManager implements DefaultLifecycleObserver, Application.A
     }
 
     private void loadVungleAppOpen() {
+        if (myApplication == null || !AdManagerHelper.isMobileAdsInitialized()) {
+            if (appOpenAd == null) {
+                loadAdMobAppOpen_Fallback();
+            } else {
+                isLoadingAd = false;
+            }
+            return;
+        }
+
         String placementId = myApplication.getString(R.string.liftoff_app_open_placement_id);
-        vungleAppOpenAd = new InterstitialAd(myApplication, placementId, null);
+        if (placementId == null || placementId.isEmpty()) {
+            if (appOpenAd == null) {
+                loadAdMobAppOpen_Fallback();
+            } else {
+                isLoadingAd = false;
+            }
+            return;
+        }
+
+        vungleAppOpenAd = new InterstitialAd(myApplication, placementId, new AdConfig());
         vungleAppOpenAd.setAdListener(new InterstitialAdListener() {
             @Override
             public void onAdLoaded(@NonNull BaseAd baseAd) {

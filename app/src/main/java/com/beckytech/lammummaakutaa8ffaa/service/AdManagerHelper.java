@@ -29,6 +29,7 @@ import com.unity3d.ads.UnityAds;
 import com.unity3d.services.banners.BannerView;
 import com.unity3d.services.banners.UnityBannerSize;
 import com.unity3d.services.banners.BannerErrorInfo;
+import com.vungle.ads.AdConfig;
 import com.vungle.ads.BannerAd;
 import com.vungle.ads.BannerAdListener;
 import com.vungle.ads.BaseAd;
@@ -44,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AdManagerHelper {
 
@@ -60,6 +62,10 @@ public class AdManagerHelper {
     private static final AtomicBoolean isMobileAdsInitialized = new AtomicBoolean(false);
     private static final List<Runnable> initCallbacks = new ArrayList<>();
     private static ConsentInformation consentInformation;
+
+    public static boolean isMobileAdsInitialized() {
+        return isMobileAdsInitialized.get();
+    }
 
     public static void initialize(Activity activity, Runnable onInitComplete) {
         setupRemoteConfig();
@@ -120,33 +126,48 @@ public class AdManagerHelper {
             }
         }
 
-        MobileAds.initialize(context, initializationStatus -> {
-            // Initialize Liftoff (Vungle) Ads
-            String vungleAppId = context.getString(R.string.liftoff_app_id);
-            VungleAds.init(context, vungleAppId, new InitializationListener() {
-                @Override
-                public void onSuccess() {}
-
-                @Override
-                public void onError(@NonNull VungleError vungleError) {}
-            });
-            
-            // Initialize Unity Ads
-            String unityGameId = context.getString(R.string.unity_game_id);
-            UnityAds.initialize(context, unityGameId, false, new IUnityAdsInitializationListener() {
-                @Override
-                public void onInitializationComplete() {}
-
-                @Override
-                public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message) {}
-            });
-
-            isMobileAdsInitialized.set(true);
-            synchronized (initCallbacks) {
-                for (Runnable callback : initCallbacks) {
-                    callback.run();
+        final AtomicInteger initCounter = new AtomicInteger(3);
+        final Runnable checkInitFinished = () -> {
+            if (initCounter.decrementAndGet() == 0) {
+                isMobileAdsInitialized.set(true);
+                synchronized (initCallbacks) {
+                    for (Runnable callback : initCallbacks) {
+                        callback.run();
+                    }
+                    initCallbacks.clear();
                 }
-                initCallbacks.clear();
+            }
+        };
+
+        MobileAds.initialize(context, initializationStatus -> {
+            checkInitFinished.run();
+        });
+
+        // Initialize Liftoff (Vungle) Ads
+        String vungleAppId = context.getString(R.string.liftoff_app_id);
+        VungleAds.init(context, vungleAppId, new InitializationListener() {
+            @Override
+            public void onSuccess() {
+                checkInitFinished.run();
+            }
+
+            @Override
+            public void onError(@NonNull VungleError vungleError) {
+                checkInitFinished.run();
+            }
+        });
+
+        // Initialize Unity Ads
+        String unityGameId = context.getString(R.string.unity_game_id);
+        UnityAds.initialize(context, unityGameId, false, new IUnityAdsInitializationListener() {
+            @Override
+            public void onInitializationComplete() {
+                checkInitFinished.run();
+            }
+
+            @Override
+            public void onInitializationFailed(UnityAds.UnityAdsInitializationError error, String message) {
+                checkInitFinished.run();
             }
         });
     }
@@ -202,6 +223,10 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleBanner(Activity activity, ViewGroup container, String placementId, Runnable onFail) {
+        if (!isMobileAdsInitialized.get()) {
+            if (onFail != null) onFail.run();
+            return;
+        }
         BannerAd vungleBanner = new BannerAd(activity, placementId, VungleAdSize.BANNER);
         vungleBanner.setAdListener(new BannerAdListener() {
             @Override
@@ -289,7 +314,11 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleInterstitial(Activity activity, String placementId, Runnable onFail) {
-        com.vungle.ads.InterstitialAd interstitialAd = new com.vungle.ads.InterstitialAd(activity, placementId, null);
+        if (!isMobileAdsInitialized.get()) {
+            if (onFail != null) onFail.run();
+            return;
+        }
+        com.vungle.ads.InterstitialAd interstitialAd = new com.vungle.ads.InterstitialAd(activity, placementId, new AdConfig());
         interstitialAd.setAdListener(new InterstitialAdListener() {
             @Override
             public void onAdLoaded(@NonNull BaseAd baseAd) {
@@ -351,7 +380,11 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleRewarded(Activity activity, String placementId, Runnable onFail) {
-        com.vungle.ads.RewardedAd rewardedAd = new com.vungle.ads.RewardedAd(activity, placementId, null);
+        if (!isMobileAdsInitialized.get()) {
+            if (onFail != null) onFail.run();
+            return;
+        }
+        com.vungle.ads.RewardedAd rewardedAd = new com.vungle.ads.RewardedAd(activity, placementId, new AdConfig());
         rewardedAd.setAdListener(new RewardedAdListener() {
             @Override
             public void onAdLoaded(@NonNull BaseAd baseAd) {
@@ -509,6 +542,10 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleNative(Context context, String placementId, FlexibleAdListener listener) {
+        if (!isMobileAdsInitialized.get()) {
+            if (listener != null) listener.onAdFailed();
+            return;
+        }
         com.vungle.ads.NativeAd nativeAd = new com.vungle.ads.NativeAd(context, placementId);
         nativeAd.setAdListener(new NativeAdListener() {
             @Override
@@ -563,6 +600,10 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleMREC(Context context, FlexibleAdListener listener) {
+        if (!isMobileAdsInitialized.get()) {
+            loadAdMobMREC_Fallback(context, listener);
+            return;
+        }
         BannerAd vungleMREC = new BannerAd(context, context.getString(R.string.liftoff_mrec_placement_id), VungleAdSize.MREC);
         vungleMREC.setAdListener(new BannerAdListener() {
             @Override
@@ -631,6 +672,10 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleBannerAsFallback(Context context, FlexibleAdListener listener) {
+        if (!isMobileAdsInitialized.get()) {
+            loadUnityBannerAsFallback(context, listener);
+            return;
+        }
         BannerAd vungleBanner = new BannerAd(context, context.getString(R.string.liftoff_banner_placement_id), VungleAdSize.BANNER);
         vungleBanner.setAdListener(new BannerAdListener() {
             @Override
