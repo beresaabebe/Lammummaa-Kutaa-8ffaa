@@ -23,6 +23,22 @@
     <string name="google_rewarded_interstitial_ads_unit_id" translatable="false">ca-app-pub-8504401574247581/5497623854</string>
     <string name="google_rewarded_ads_unit_id" translatable="false">ca-app-pub-8504401574247581/2261086421</string>
 
+    <!-- Liftoff (Vungle) Ads -->
+    <string name="liftoff_app_id" translatable="false">6a8abf71f5afadb097fea124</string>
+    <string name="liftoff_banner_placement_id" translatable="false">BANNER-2265320</string>
+    <string name="liftoff_interstitial_placement_id" translatable="false">INTERSTITIAL-7433654</string>
+    <string name="liftoff_native_placement_id" translatable="false">NATIVE-7709061</string>
+    <string name="liftoff_rewarded_placement_id" translatable="false">REWARDED-6456358</string>
+    <string name="liftoff_mrec_placement_id" translatable="false">MREC-5128538</string>
+    <string name="liftoff_app_open_placement_id" translatable="false">APP_OPEN-8500166</string>
+
+
+    <!-- Unity Ads -->
+    <string name="unity_game_id" translatable="false">800077043</string>
+    <string name="unity_banner_placement_id" translatable="false">Banner_Android</string>
+    <string name="unity_interstitial_placement_id" translatable="false">Interstitial_Android</string>
+    <string name="unity_rewarded_placement_id" translatable="false">Rewarded_Android</string>
+
     <string name="download_more_apps">Download more apps</string>
     <string name="privacy_title">Privacy</string>
     <string name="download_now">Download Now</string>
@@ -67,4 +83,5 @@
     <string name="rate_now">Rate Now</string>
     <string name="remind_later">Remind me later</string>
     <string name="no_thanks">No, thanks</string>
+    <string name="join_telegram">Join Telegram</string>
 </resources>

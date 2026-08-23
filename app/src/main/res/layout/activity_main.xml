@@ -8,15 +8,12 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <androidx.appcompat.widget.SearchView
-        android:id="@+id/searchView"
+    <FrameLayout
+        android:id="@+id/banner_container_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp"
-        android:background="@drawable/search_bg"
-        app:iconifiedByDefault="false"
-        app:queryBackground="@android:color/transparent"
-        app:queryHint="Search chapters..." />
+        android:layout_gravity="center"
+        android:minHeight="50dp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView_main_item"

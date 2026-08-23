@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/action_language"
+        android:icon="@drawable/ic_baseline_language_24"
+        android:title="@string/change_language" />
+    <item
+        android:id="@+id/action_join_telegram"
+        android:icon="@drawable/ic_baseline_telegram_24"
+        android:title="@string/join_telegram"/>
+    <item
         android:id="@+id/action_more_apps"
         android:icon="@drawable/ic_baseline_read_more_24"
         android:title="@string/more_apps" />
@@ -19,10 +27,7 @@
         android:id="@+id/action_update"
         android:icon="@drawable/ic_baseline_update_24"
         android:title="@string/update" />
-    <item
-        android:id="@+id/action_language"
-        android:icon="@drawable/ic_baseline_language_24"
-        android:title="@string/change_language" />
+
     <item
         android:id="@+id/action_share"
         android:icon="@drawable/ic_baseline_share_24"

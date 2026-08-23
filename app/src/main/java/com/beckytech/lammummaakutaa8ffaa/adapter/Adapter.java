@@ -5,6 +5,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -15,12 +16,13 @@ import android.widget.RatingBar;
 import com.beckytech.lammummaakutaa8ffaa.R;
 import com.beckytech.lammummaakutaa8ffaa.model.Model;
 import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.nativead.MediaView;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.vungle.ads.internal.ui.view.MediaView;
 
 public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -32,6 +34,7 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final int ITEM_TYPE_BANNER = 1;
     private static final int ITEM_TYPE_NATIVE_AD = 2;
     private static final int ITEM_TYPE_SHIMMER = 3;
+    private static final int ITEM_TYPE_VUNGLE_NATIVE_AD = 4;
 
     public Adapter(List<Object> list, onBookClicked bookClicked) {
         this.list = list;
@@ -52,6 +55,9 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else if (viewType == ITEM_TYPE_NATIVE_AD) {
             View nativeView = LayoutInflater.from(parent.getContext()).inflate(R.layout.native_ad_layout, parent, false);
             return new NativeAdViewHolder(nativeView);
+        } else if (viewType == ITEM_TYPE_VUNGLE_NATIVE_AD) {
+            View vungleNativeView = LayoutInflater.from(parent.getContext()).inflate(R.layout.native_ad_layout, parent, false);
+            return new NativeAdViewHolder(vungleNativeView);
         } else if (viewType == ITEM_TYPE_SHIMMER) {
             View shimmerView = LayoutInflater.from(parent.getContext()).inflate(R.layout.native_ad_shimmer, parent, false);
             return new ShimmerViewHolder(shimmerView);
@@ -73,11 +79,14 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         } else if (viewType == ITEM_TYPE_NATIVE_AD) {
             NativeAd nativeAd = (NativeAd) filteredList.get(position);
             populateNativeAdView(nativeAd, (NativeAdView) holder.itemView);
+        } else if (viewType == ITEM_TYPE_VUNGLE_NATIVE_AD) {
+            com.vungle.ads.NativeAd vungleNativeAd = (com.vungle.ads.NativeAd) filteredList.get(position);
+            populateVungleNativeAdView(vungleNativeAd, holder.itemView);
         } else if (viewType == ITEM_TYPE_SHIMMER) {
             // Shimmer starts automatically
         } else {
             AdViewHolder adViewHolder = (AdViewHolder) holder;
-            AdView adView = (AdView) filteredList.get(position);
+            View adView = (View) filteredList.get(position);
             ViewGroup adContainer = (ViewGroup) adViewHolder.itemView;
             if (adContainer.getChildCount() > 0) {
                 adContainer.removeAllViews();
@@ -86,6 +95,27 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 ((ViewGroup) adView.getParent()).removeView(adView);
             }
             adContainer.addView(adView);
+        }
+    }
+
+    private void populateVungleNativeAdView(com.vungle.ads.NativeAd nativeAd, View adView) {
+        TextView title = adView.findViewById(R.id.ad_headline);
+        TextView body = adView.findViewById(R.id.ad_body);
+        Button cta = adView.findViewById(R.id.ad_call_to_action);
+        ImageView icon = adView.findViewById(R.id.ad_app_icon);
+
+        title.setText(nativeAd.getAdTitle());
+        body.setText(nativeAd.getAdBodyText());
+        cta.setText(nativeAd.getAdCallToActionText());
+        
+        List<View> clickableViews = new ArrayList<>();
+        clickableViews.add(title);
+        clickableViews.add(cta);
+        
+        // Vungle SDK 7 uses its own MediaView.
+        MediaView vungleMediaView = nativeAd.getMediaView();
+        if (vungleMediaView != null && adView instanceof FrameLayout) {
+            nativeAd.registerViewForInteraction((FrameLayout) adView, vungleMediaView, icon, clickableViews);
         }
     }
 
@@ -162,6 +192,8 @@ public class Adapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return ITEM_TYPE_BOOK;
         } else if (item instanceof NativeAd) {
             return ITEM_TYPE_NATIVE_AD;
+        } else if (item instanceof com.vungle.ads.NativeAd) {
+            return ITEM_TYPE_VUNGLE_NATIVE_AD;
         } else if (item instanceof String && item.equals("SHIMMER")) {
             return ITEM_TYPE_SHIMMER;
         } else {

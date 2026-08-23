@@ -97,10 +97,11 @@ public class ChapterFragment extends Fragment {
     }
 
     @Override
-    public void onDestroy() {
+    public void onDestroyView() {
         if (pdfAdapter != null) {
             pdfAdapter.close();
+            pdfAdapter = null;
         }
-        super.onDestroy();
+        super.onDestroyView();
     }
 }

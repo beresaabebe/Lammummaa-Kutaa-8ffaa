@@ -1,5 +1,6 @@
 package com.beckytech.lammummaakutaa8ffaa;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -31,9 +32,7 @@ import com.beckytech.lammummaakutaa8ffaa.contents.TitleContents;
 import com.beckytech.lammummaakutaa8ffaa.model.Model;
 import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
 import com.beckytech.lammummaakutaa8ffaa.service.LocaleHelper;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.navigation.NavigationView;
@@ -50,11 +49,7 @@ import com.google.android.play.core.review.ReviewManagerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.android.gms.ads.nativead.NativeAd;
-
 import com.google.firebase.analytics.FirebaseAnalytics;
-
-import androidx.appcompat.widget.SearchView;
 
 public class MainActivity extends AppCompatActivity implements Adapter.onBookClicked {
     public static final int ADS_PER_ITEM = 5;
@@ -65,7 +60,6 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     private List<Object> modelList;
     private ReviewInfo reviewInfo;
     private ReviewManager manager;
-    private NavigationView navigationView;
     private DrawerLayout drawerLayout;
     private AppUpdateManager appUpdateManager;
     private Adapter adapter;
@@ -96,29 +90,12 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         checkUpdate(false);
         toolBarAndDrawerNavigation();
         booksDataRecycler();
-        setupSearchView();
 
-        AdManagerHelper.loadInterstitial(this, getString(R.string.google_interstitial_ads_unit_id));
-        AdManagerHelper.loadRewardedInterstitial(this, getString(R.string.google_rewarded_interstitial_ads_unit_id));
-        new Handler().postDelayed(() -> AdManagerHelper.showInterstitial(this), 10000);
-    }
-
-    private void setupSearchView() {
-        SearchView searchView = findViewById(R.id.searchView);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                if (adapter != null) {
-                    adapter.filter(newText);
-                }
-                return true;
-            }
+        AdManagerHelper.initialize(this, () -> {
+            AdManagerHelper.loadAdsByConsent(this);
+            AdManagerHelper.loadAdaptiveBanner(this, findViewById(R.id.banner_container_main), getString(R.string.google_banner_ad_unit_id_main), false);
         });
+        new Handler().postDelayed(() -> AdManagerHelper.showInterstitial(this), 10000);
     }
 
     private void checkUpdate(boolean showToastIfNoUpdate) {
@@ -153,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         drawerToggle.getDrawerArrowDrawable().setColor(ContextCompat.getColor(this, R.color.white));
         drawerLayout.addDrawerListener(drawerToggle);
 
-        navigationView = findViewById(R.id.navigationView);
+        NavigationView navigationView = findViewById(R.id.navigationView);
         navigationView.setNavigationItemSelectedListener(item -> {
             MenuOptions(item);
             return true;
@@ -195,26 +172,32 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
     }
 
     private void insertAds() {
-        for (int i = ADS_PER_ITEM; i <= modelList.size(); i += ADS_PER_ITEM + 1) {
+        int adCount = 0;
+        int maxAds = 5;
+        for (int i = ADS_PER_ITEM; i <= modelList.size() && adCount < maxAds; i += ADS_PER_ITEM + 1) {
+            adCount++;
             final int index = i;
             modelList.add(index, "SHIMMER");
             adapter.notifyItemInserted(index);
-            AdManagerHelper.loadNativeAd(this, getString(R.string.google_native_ads_unit_id), new AdManagerHelper.NativeAdListener() {
+            AdManagerHelper.loadNativeAd(this, getString(R.string.google_native_ads_unit_id), new AdManagerHelper.FlexibleAdListener() {
                 @Override
-                public void onNativeAdLoaded(NativeAd nativeAd) {
-                    modelList.set(index, nativeAd);
-                    adapter.notifyItemChanged(index);
+                public void onAdLoaded(Object ad) {
+                    if (index < modelList.size()) {
+                        Object oldItem = modelList.get(index);
+                        if (oldItem instanceof NativeAd) {
+                            ((NativeAd) oldItem).destroy();
+                        }
+                        modelList.set(index, ad);
+                        adapter.notifyItemChanged(index);
+                    }
                 }
 
                 @Override
-                public void onNativeAdFailed() {
-                    // Fallback to banner if native fails
-                    AdView adView = new AdView(MainActivity.this);
-                    adView.setAdUnitId(getString(R.string.google_banner_ad_unit_id_main));
-                    adView.setAdSize(AdSize.BANNER);
-                    adView.loadAd(new AdRequest.Builder().build());
-                    modelList.set(index, adView);
-                    adapter.notifyItemChanged(index);
+                public void onAdFailed() {
+                    if (index < modelList.size()) {
+                        modelList.remove(index);
+                        adapter.notifyItemRemoved(index);
+                    }
                 }
             });
         }
@@ -245,6 +228,26 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
                     .setPositiveButton(R.string.yes, (dialog, which) -> finish())
                     .setNegativeButton(R.string.cancel, null)
                     .show();
+        } else if (id == R.id.action_join_telegram) {
+            openTelegram();
+        }
+    }
+
+    private void openTelegram() {
+        String telegramUsername = "beckytech";
+        String appUri = "tg://resolve?domain=" + telegramUsername;
+        String webUri = "https://t.me/" + telegramUsername;
+
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(appUri));
+            this.startActivity(intent);
+        } catch (ActivityNotFoundException e) {
+            try {
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(webUri));
+                this.startActivity(browserIntent);
+            } catch (ActivityNotFoundException ex) {
+                Toast.makeText(this, "Unable to open link. No browser found.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -275,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
         mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle);
 
         if (new java.util.Random().nextInt(3) == 0) {
-            AdManagerHelper.showRewardedInterstitial(this);
+            AdManagerHelper.showRewardedAd(this);
             AdManagerHelper.loadRewardedInterstitial(this, getString(R.string.google_rewarded_interstitial_ads_unit_id));
         } else {
             AdManagerHelper.showInterstitial(this);
@@ -322,5 +325,17 @@ public class MainActivity extends AppCompatActivity implements Adapter.onBookCli
                 }
             });
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (modelList != null) {
+            for (Object item : modelList) {
+                if (item instanceof NativeAd) {
+                    ((NativeAd) item).destroy();
+                }
+            }
+        }
+        super.onDestroy();
     }
 }

@@ -21,9 +21,9 @@
 #-renamesourcefileattribute SourceFile
 -keep class com.shockwave.**
 
-# AdMob Mediation Facebook
--keep class com.facebook.ads.** { *; }
--keep class com.google.ads.mediation.facebook.** { *; }
+# AdMob Mediation Liftoff (Vungle)
+-keep class com.vungle.ads.** { *; }
+-keep class com.google.ads.mediation.vungle.** { *; }
 
 # AdMob Mediation Unity
 -keep class com.unity3d.ads.** { *; }
@@ -43,7 +43,6 @@
 -keepattributes InnerClasses
 
 # R8 missing classes rules
--dontwarn com.facebook.infer.annotation.Nullsafe
 -dontwarn com.unity3d.ads.AdFormat
 -dontwarn com.unity3d.ads.IUnityAdsInitializationListener
 -dontwarn com.unity3d.ads.IUnityAdsLoadListener

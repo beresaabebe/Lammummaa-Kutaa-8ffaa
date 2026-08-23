@@ -57,7 +57,7 @@ public class AboutActivity extends AppCompatActivity implements AboutAdapter.OnL
         }
 
         TextView version = findViewById(R.id.version_tv);
-        version.setText(String.format(Locale.ENGLISH, "Version: %s", BuildConfig.VERSION_NAME));
+        version.setText(String.format(Locale.ENGLISH, "%s", BuildConfig.VERSION_NAME));
 
         findViewById(R.id.imageView).setOnClickListener(view -> {
             Intent intent = new Intent(Intent.ACTION_SEND);

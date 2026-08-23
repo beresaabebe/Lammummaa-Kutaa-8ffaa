@@ -101,16 +101,21 @@ public class BookDetailActivity extends AppCompatActivity {
         subTitle.setText(modelList.get(currentPos).getSubTitle());
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            private int pageCount = 0;
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
                 title.setText(modelList.get(position).getTitle());
                 subTitle.setText(modelList.get(position).getSubTitle());
                 
-                AdManagerHelper.showRandomRewardedAd(BookDetailActivity.this, 
-                        getString(R.string.google_rewarded_ads_unit_id),
-                        getString(R.string.google_rewarded_interstitial_ads_unit_id),
-                        getString(R.string.google_interstitial_ads_unit_id));
+                pageCount++;
+                if (pageCount >= 5) {
+                    pageCount = 0;
+                    AdManagerHelper.showRandomRewardedAd(BookDetailActivity.this, 
+                            getString(R.string.google_rewarded_ads_unit_id),
+                            getString(R.string.google_rewarded_interstitial_ads_unit_id),
+                            getString(R.string.google_interstitial_ads_unit_id));
+                }
             }
         });
     }

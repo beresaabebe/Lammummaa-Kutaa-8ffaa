@@ -6,6 +6,7 @@ import android.os.ParcelFileDescriptor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,9 +22,6 @@ import android.widget.RatingBar;
 import android.widget.TextView;
 
 import com.beckytech.lammummaakutaa8ffaa.service.AdManagerHelper;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.nativead.NativeAd;
 import com.google.android.gms.ads.nativead.NativeAdView;
 
@@ -34,10 +32,14 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.vungle.ads.internal.ui.view.MediaView;
+
 public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private static final int TYPE_PAGE = 0;
-    private static final int TYPE_AD = 1;
+    private static final int TYPE_NATIVE_AD = 1;
+    private static final int TYPE_BANNER_AD = 2;
+    private static final int TYPE_VUNGLE_NATIVE_AD = 3;
     private static final int AD_INTERVAL = 4;
 
     private final ParcelFileDescriptor fileDescriptor;
@@ -47,6 +49,7 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final ExecutorService executorService = Executors.newSingleThreadExecutor();
     private int pagesReadCount = 0;
     private final OnPagesReadListener pagesReadListener;
+    private boolean isClosed = false;
 
     public interface OnPagesReadListener {
         void onPageRead(int count);
@@ -67,10 +70,13 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             }
         };
 
+        int adCount = 0;
+        int maxAds = 3; // Limit ads per chapter
         for (int i = 0; i < pages.length; i++) {
             items.add(pages[i]);
-            if ((i + 1) % AD_INTERVAL == 0) {
+            if ((i + 1) % AD_INTERVAL == 0 && adCount < maxAds) {
                 items.add("AD_PLACEHOLDER");
+                adCount++;
             }
         }
     }
@@ -81,6 +87,9 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         if (viewType == TYPE_PAGE) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.pdf_page_item, parent, false);
             return new PdfViewHolder(view);
+        } else if (viewType == TYPE_BANNER_AD) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.ad_banner_container, parent, false);
+            return new BannerViewHolder(view);
         } else {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.native_ad_layout, parent, false);
             return new NativeAdViewHolder(view);
@@ -89,10 +98,18 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (getItemViewType(position) == TYPE_PAGE) {
+        int viewType = getItemViewType(position);
+        if (viewType == TYPE_PAGE) {
             int pageIndex = (int) items.get(position);
             PdfViewHolder pdfViewHolder = (PdfViewHolder) holder;
-            if (pageIndex < 0 || pageIndex >= pdfRenderer.getPageCount()) return;
+            
+            int pageCount;
+            synchronized (pdfRenderer) {
+                if (isClosed) return;
+                pageCount = pdfRenderer.getPageCount();
+            }
+            
+            if (pageIndex < 0 || pageIndex >= pageCount) return;
 
             Bitmap cachedBitmap = bitmapCache.get(pageIndex);
             if (cachedBitmap != null) {
@@ -111,13 +128,43 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                     }
                 });
             }
+        } else if (viewType == TYPE_NATIVE_AD) {
+            NativeAd nativeAd = (NativeAd) items.get(position);
+            populateNativeAdView(nativeAd, (NativeAdView) holder.itemView);
+        } else if (viewType == TYPE_VUNGLE_NATIVE_AD) {
+            com.vungle.ads.NativeAd vungleNativeAd = (com.vungle.ads.NativeAd) items.get(position);
+            populateVungleNativeAdView(vungleNativeAd, holder.itemView);
+        } else if (viewType == TYPE_BANNER_AD) {
+            View adView = (View) items.get(position);
+            BannerViewHolder bannerViewHolder = (BannerViewHolder) holder;
+            ViewGroup container = (ViewGroup) bannerViewHolder.itemView;
+            if (container.getChildCount() > 0) container.removeAllViews();
+            if (adView.getParent() != null) ((ViewGroup) adView.getParent()).removeView(adView);
+            container.addView(adView);
         } else {
-            Object item = items.get(position);
-            if (item instanceof NativeAd) {
-                populateNativeAdView((NativeAd) item, (NativeAdView) holder.itemView);
-            } else if (item.equals("AD_PLACEHOLDER")) {
-                loadAdAtPosition(position, holder.itemView.getContext());
-            }
+            // AD_PLACEHOLDER
+            loadAdAtPosition(position, holder.itemView.getContext());
+        }
+    }
+
+    private void populateVungleNativeAdView(com.vungle.ads.NativeAd nativeAd, View adView) {
+        TextView title = adView.findViewById(R.id.ad_headline);
+        TextView body = adView.findViewById(R.id.ad_body);
+        Button cta = adView.findViewById(R.id.ad_call_to_action);
+        ImageView icon = adView.findViewById(R.id.ad_app_icon);
+
+        title.setText(nativeAd.getAdTitle());
+        body.setText(nativeAd.getAdBodyText());
+        cta.setText(nativeAd.getAdCallToActionText());
+        
+        List<View> clickableViews = new ArrayList<>();
+        clickableViews.add(title);
+        clickableViews.add(cta);
+        
+        // Vungle SDK 7 uses its own MediaView.
+        MediaView vungleMediaView = nativeAd.getMediaView();
+        if (vungleMediaView != null && adView instanceof FrameLayout) {
+            nativeAd.registerViewForInteraction((FrameLayout) adView, vungleMediaView, icon, clickableViews);
         }
     }
 
@@ -130,31 +177,42 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private Bitmap renderPage(int pageIndex) {
         synchronized (pdfRenderer) {
-            PdfRenderer.Page page = pdfRenderer.openPage(pageIndex);
-            Bitmap bitmap = Bitmap.createBitmap(page.getWidth() * 2, page.getHeight() * 2, Bitmap.Config.ARGB_8888);
-            page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
-            page.close();
-            return bitmap;
+            if (isClosed) return null;
+            try (PdfRenderer.Page page = pdfRenderer.openPage(pageIndex)) {
+                Bitmap bitmap = Bitmap.createBitmap(page.getWidth() * 2, page.getHeight() * 2, Bitmap.Config.ARGB_8888);
+                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+                return bitmap;
+            } catch (Exception e) {
+                return null;
+            }
         }
     }
 
     private void loadAdAtPosition(int position, android.content.Context context) {
-        AdManagerHelper.loadNativeAd(context, context.getString(R.string.google_native_ads_unit_id), new AdManagerHelper.NativeAdListener() {
+        AdManagerHelper.loadNativeAd(context, context.getString(R.string.google_native_ads_unit_id), new AdManagerHelper.FlexibleAdListener() {
             @Override
-            public void onNativeAdLoaded(NativeAd nativeAd) {
-                items.set(position, nativeAd);
+            public void onAdLoaded(Object ad) {
+                synchronized (pdfRenderer) {
+                    if (isClosed) {
+                        if (ad instanceof NativeAd) ((NativeAd) ad).destroy();
+                        return;
+                    }
+                }
+                Object oldItem = items.get(position);
+                if (oldItem instanceof NativeAd) {
+                    ((NativeAd) oldItem).destroy();
+                }
+                items.set(position, ad);
                 notifyItemChanged(position);
             }
 
             @Override
-            public void onNativeAdFailed() {
-                // Fallback to banner
-                AdView adView = new AdView(context);
-                adView.setAdUnitId(context.getString(R.string.google_banner_ad_unit_id_main));
-                adView.setAdSize(AdSize.BANNER);
-                adView.loadAd(new AdRequest.Builder().build());
-                items.set(position, adView);
-                notifyItemChanged(position);
+            public void onAdFailed() {
+                synchronized (pdfRenderer) {
+                    if (isClosed) return;
+                }
+                items.remove(position);
+                notifyItemRemoved(position);
             }
         });
     }
@@ -227,7 +285,12 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        return items.get(position) instanceof Integer ? TYPE_PAGE : TYPE_AD;
+        Object item = items.get(position);
+        if (item instanceof Integer) return TYPE_PAGE;
+        if (item instanceof NativeAd) return TYPE_NATIVE_AD;
+        if (item instanceof com.vungle.ads.NativeAd) return TYPE_VUNGLE_NATIVE_AD;
+        if (item instanceof View) return TYPE_BANNER_AD;
+        return -1; // AD_PLACEHOLDER or unknown
     }
 
     @Override
@@ -236,12 +299,27 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public void close() {
-        executorService.shutdown();
-        try {
-            pdfRenderer.close();
-            fileDescriptor.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (pdfRenderer) {
+            if (isClosed) return;
+            isClosed = true;
+            executorService.shutdownNow();
+            
+            for (Object item : items) {
+                if (item instanceof NativeAd) {
+                    ((NativeAd) item).destroy();
+                } else if (item instanceof com.vungle.ads.NativeAd) {
+                    // Vungle ads are usually destroyed when the View is detached or via their own lifecycle, 
+                    // but we should check if there's an explicit destroy.
+                    // For Vungle SDK 7, the ad object itself doesn't have a destroy() but it's good to null it.
+                }
+            }
+
+            try {
+                pdfRenderer.close();
+                fileDescriptor.close();
+            } catch (IOException | IllegalStateException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -256,6 +334,12 @@ public class PdfAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     static class NativeAdViewHolder extends RecyclerView.ViewHolder {
         public NativeAdViewHolder(@NonNull View itemView) {
+            super(itemView);
+        }
+    }
+
+    static class BannerViewHolder extends RecyclerView.ViewHolder {
+        public BannerViewHolder(@NonNull View itemView) {
             super(itemView);
         }
     }

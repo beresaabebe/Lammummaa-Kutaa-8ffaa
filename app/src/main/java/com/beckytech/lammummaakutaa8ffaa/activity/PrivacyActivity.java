@@ -22,6 +22,8 @@ public class PrivacyActivity extends AppCompatActivity {
         super.attachBaseContext(LocaleHelper.onAttach(newBase));
     }
 
+    private WebView webView;
+
     @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +36,8 @@ public class PrivacyActivity extends AppCompatActivity {
         TextView tv_title = findViewById(R.id.tv_title);
         tv_title.setText(R.string.privacy_title);
 
-        WebView webView = findViewById(R.id.webView_privacy);
-        webView.loadUrl("https://yoosaad.com/beresa-android-website-privacy-policy/");
+        webView = findViewById(R.id.webView_privacy);
+        webView.loadUrl("https://yoosaad.com/privacy/");
         webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
@@ -55,5 +57,29 @@ public class PrivacyActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.GONE);
             }
         });
+    }
+    @Override
+    protected void onPause() {
+        if (webView != null) webView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (webView != null) webView.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.loadUrl("about:blank");
+            webView.stopLoading();
+            webView.setWebChromeClient(null);
+            webView.setWebViewClient(null);
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
     }
 }

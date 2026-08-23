@@ -11,8 +11,8 @@ android {
         applicationId "com.beckytech.lammummaakutaa8ffaa"
         minSdk 23
         targetSdk 37
-        versionCode 16
-        versionName "2.0.5"
+        versionCode 17
+        versionName "2.0.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -39,7 +39,8 @@ dependencies {
     implementation libs.material
     implementation libs.constraintlayout
     implementation libs.play.services.ads
-    implementation libs.facebook.mediation
+    implementation libs.liftoff.mediation
+    implementation libs.unity.sdk
     implementation libs.unity.mediation
     implementation libs.user.messaging.platform
     implementation libs.shimmer
