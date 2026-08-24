@@ -17,6 +17,7 @@ import com.google.android.gms.ads.LoadAdError;
 import com.google.android.gms.ads.appopen.AppOpenAd;
 import com.vungle.ads.AdConfig;
 import com.vungle.ads.BaseAd;
+import com.vungle.ads.VungleAds;
 import com.vungle.ads.VungleError;
 import com.vungle.ads.InterstitialAdListener;
 import com.vungle.ads.InterstitialAd;
@@ -78,7 +79,7 @@ public class AppOpenAdManager implements DefaultLifecycleObserver, Application.A
     }
 
     private void loadVungleAppOpen() {
-        if (myApplication == null || !AdManagerHelper.isMobileAdsInitialized()) {
+        if (myApplication == null || !AdManagerHelper.isMobileAdsInitialized() || !VungleAds.isInitialized()) {
             if (appOpenAd == null) {
                 loadAdMobAppOpen_Fallback();
             } else {
@@ -97,34 +98,45 @@ public class AppOpenAdManager implements DefaultLifecycleObserver, Application.A
             return;
         }
 
-        vungleAppOpenAd = new InterstitialAd(myApplication, placementId, new AdConfig());
-        vungleAppOpenAd.setAdListener(new InterstitialAdListener() {
-            @Override
-            public void onAdLoaded(@NonNull BaseAd baseAd) {
-                isLoadingAd = false;
-                loadTime = (new Date()).getTime();
-            }
+        try {
+            vungleAppOpenAd = new InterstitialAd(myApplication, placementId, new AdConfig());
+            vungleAppOpenAd.setAdListener(new InterstitialAdListener() {
+                @Override
+                public void onAdLoaded(@NonNull BaseAd baseAd) {
+                    isLoadingAd = false;
+                    loadTime = (new Date()).getTime();
+                }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (appOpenAd == null) {
-                    loadAdMobAppOpen_Fallback();
-                } else {
+                @Override
+                public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    vungleAppOpenAd = null;
+                    if (appOpenAd == null) {
+                        loadAdMobAppOpen_Fallback();
+                    } else {
+                        isLoadingAd = false;
+                    }
+                }
+
+                @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    vungleAppOpenAd = null;
                     isLoadingAd = false;
                 }
-            }
 
-            @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
+                @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
+                @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
+                @Override public void onAdStart(@NonNull BaseAd baseAd) {}
+                @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
+            });
+            vungleAppOpenAd.load((String) null);
+        } catch (Exception e) {
+            vungleAppOpenAd = null;
+            if (appOpenAd == null) {
+                loadAdMobAppOpen_Fallback();
+            } else {
                 isLoadingAd = false;
             }
-
-            @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
-            @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
-            @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
-            @Override public void onAdStart(@NonNull BaseAd baseAd) {}
-            @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
-        });
-        vungleAppOpenAd.load((String) null);
+        }
     }
 
     private void loadAdMobAppOpen_Fallback() {

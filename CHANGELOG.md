@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.9] - 2026-08-24
+### Fixed
+- **Vungle SDK 7 Stability**: Resolved `NullPointerException` in `InterstitialAd` constructor by adding defensive checks for SDK initialization and wrapping object creation in try-catch blocks.
+- **Initialization Synchronization**: Improved SDK initialization flow to ensure Vungle and Unity are fully ready before ad requests are permitted.
+
 ## [2.0.6] - 2026-08-23
 ### Added
 - **Multi-Network Ad Competition**: Implemented randomized load requests between AdMob and Liftoff (Vungle) for Native, MREC, and App Open formats to optimize eCPM.

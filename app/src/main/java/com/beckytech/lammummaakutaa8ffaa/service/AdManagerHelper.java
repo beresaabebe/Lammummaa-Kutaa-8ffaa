@@ -223,39 +223,43 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleBanner(Activity activity, ViewGroup container, String placementId, Runnable onFail) {
-        if (!isMobileAdsInitialized.get()) {
+        if (!isMobileAdsInitialized.get() || !VungleAds.isInitialized()) {
             if (onFail != null) onFail.run();
             return;
         }
-        BannerAd vungleBanner = new BannerAd(activity, placementId, VungleAdSize.BANNER);
-        vungleBanner.setAdListener(new BannerAdListener() {
-            @Override
-            public void onAdLoaded(@NonNull BaseAd baseAd) {
-                View adView = vungleBanner.getBannerView();
-                if (adView != null) {
-                    container.removeAllViews();
-                    container.addView(adView);
-                } else {
+        try {
+            BannerAd vungleBanner = new BannerAd(activity, placementId, VungleAdSize.BANNER);
+            vungleBanner.setAdListener(new BannerAdListener() {
+                @Override
+                public void onAdLoaded(@NonNull BaseAd baseAd) {
+                    View adView = vungleBanner.getBannerView();
+                    if (adView != null) {
+                        container.removeAllViews();
+                        container.addView(adView);
+                    } else {
+                        if (onFail != null) onFail.run();
+                    }
+                }
+
+                @Override
+                public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
                     if (onFail != null) onFail.run();
                 }
-            }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (onFail != null) onFail.run();
-            }
+                @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    if (onFail != null) onFail.run();
+                }
 
-            @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (onFail != null) onFail.run();
-            }
-
-            @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
-            @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
-            @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
-            @Override public void onAdStart(@NonNull BaseAd baseAd) {}
-            @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
-        });
-        vungleBanner.load((String) null);
+                @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
+                @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
+                @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
+                @Override public void onAdStart(@NonNull BaseAd baseAd) {}
+                @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
+            });
+            vungleBanner.load((String) null);
+        } catch (Exception e) {
+            if (onFail != null) onFail.run();
+        }
     }
 
     private static void loadUnityBanner(Activity activity, ViewGroup container, String placementId, Runnable onFail) {
@@ -314,33 +318,37 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleInterstitial(Activity activity, String placementId, Runnable onFail) {
-        if (!isMobileAdsInitialized.get()) {
+        if (!isMobileAdsInitialized.get() || !VungleAds.isInitialized()) {
             if (onFail != null) onFail.run();
             return;
         }
-        com.vungle.ads.InterstitialAd interstitialAd = new com.vungle.ads.InterstitialAd(activity, placementId, new AdConfig());
-        interstitialAd.setAdListener(new InterstitialAdListener() {
-            @Override
-            public void onAdLoaded(@NonNull BaseAd baseAd) {
-                interstitialAd.play(activity);
-            }
+        try {
+            com.vungle.ads.InterstitialAd interstitialAd = new com.vungle.ads.InterstitialAd(activity, placementId, new AdConfig());
+            interstitialAd.setAdListener(new InterstitialAdListener() {
+                @Override
+                public void onAdLoaded(@NonNull BaseAd baseAd) {
+                    interstitialAd.play(activity);
+                }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (onFail != null) onFail.run();
-            }
+                @Override
+                public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    if (onFail != null) onFail.run();
+                }
 
-            @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (onFail != null) onFail.run();
-            }
+                @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    if (onFail != null) onFail.run();
+                }
 
-            @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
-            @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
-            @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
-            @Override public void onAdStart(@NonNull BaseAd baseAd) {}
-            @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
-        });
-        interstitialAd.load((String) null);
+                @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
+                @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
+                @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
+                @Override public void onAdStart(@NonNull BaseAd baseAd) {}
+                @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
+            });
+            interstitialAd.load((String) null);
+        } catch (Exception e) {
+            if (onFail != null) onFail.run();
+        }
     }
 
     private static void loadUnityInterstitial(Activity activity, String placementId) {
@@ -380,34 +388,38 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleRewarded(Activity activity, String placementId, Runnable onFail) {
-        if (!isMobileAdsInitialized.get()) {
+        if (!isMobileAdsInitialized.get() || !VungleAds.isInitialized()) {
             if (onFail != null) onFail.run();
             return;
         }
-        com.vungle.ads.RewardedAd rewardedAd = new com.vungle.ads.RewardedAd(activity, placementId, new AdConfig());
-        rewardedAd.setAdListener(new RewardedAdListener() {
-            @Override
-            public void onAdLoaded(@NonNull BaseAd baseAd) {
-                rewardedAd.play(activity);
-            }
+        try {
+            com.vungle.ads.RewardedAd rewardedAd = new com.vungle.ads.RewardedAd(activity, placementId, new AdConfig());
+            rewardedAd.setAdListener(new RewardedAdListener() {
+                @Override
+                public void onAdLoaded(@NonNull BaseAd baseAd) {
+                    rewardedAd.play(activity);
+                }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (onFail != null) onFail.run();
-            }
+                @Override
+                public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    if (onFail != null) onFail.run();
+                }
 
-            @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (onFail != null) onFail.run();
-            }
+                @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    if (onFail != null) onFail.run();
+                }
 
-            @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
-            @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
-            @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
-            @Override public void onAdStart(@NonNull BaseAd baseAd) {}
-            @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
-            @Override public void onAdRewarded(@NonNull BaseAd baseAd) {}
-        });
-        rewardedAd.load((String) null);
+                @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
+                @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
+                @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
+                @Override public void onAdStart(@NonNull BaseAd baseAd) {}
+                @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
+                @Override public void onAdRewarded(@NonNull BaseAd baseAd) {}
+            });
+            rewardedAd.load((String) null);
+        } catch (Exception e) {
+            if (onFail != null) onFail.run();
+        }
     }
 
     private static void loadUnityRewarded(Activity activity, String placementId) {
@@ -542,33 +554,37 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleNative(Context context, String placementId, FlexibleAdListener listener) {
-        if (!isMobileAdsInitialized.get()) {
+        if (!isMobileAdsInitialized.get() || !VungleAds.isInitialized()) {
             if (listener != null) listener.onAdFailed();
             return;
         }
-        com.vungle.ads.NativeAd nativeAd = new com.vungle.ads.NativeAd(context, placementId);
-        nativeAd.setAdListener(new NativeAdListener() {
-            @Override
-            public void onAdLoaded(@NonNull BaseAd baseAd) {
-                if (listener != null) listener.onAdLoaded(nativeAd);
-            }
+        try {
+            com.vungle.ads.NativeAd nativeAd = new com.vungle.ads.NativeAd(context, placementId);
+            nativeAd.setAdListener(new NativeAdListener() {
+                @Override
+                public void onAdLoaded(@NonNull BaseAd baseAd) {
+                    if (listener != null) listener.onAdLoaded(nativeAd);
+                }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (listener != null) listener.onAdFailed();
-            }
+                @Override
+                public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    if (listener != null) listener.onAdFailed();
+                }
 
-            @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                if (listener != null) listener.onAdFailed();
-            }
+                @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    if (listener != null) listener.onAdFailed();
+                }
 
-            @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
-            @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
-            @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
-            @Override public void onAdStart(@NonNull BaseAd baseAd) {}
-            @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
-        });
-        nativeAd.load((String) null);
+                @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
+                @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
+                @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
+                @Override public void onAdStart(@NonNull BaseAd baseAd) {}
+                @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
+            });
+            nativeAd.load((String) null);
+        } catch (Exception e) {
+            if (listener != null) listener.onAdFailed();
+        }
     }
 
     public static void loadMREC(Context context, FlexibleAdListener listener) {
@@ -600,38 +616,42 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleMREC(Context context, FlexibleAdListener listener) {
-        if (!isMobileAdsInitialized.get()) {
+        if (!isMobileAdsInitialized.get() || !VungleAds.isInitialized()) {
             loadAdMobMREC_Fallback(context, listener);
             return;
         }
-        BannerAd vungleMREC = new BannerAd(context, context.getString(R.string.liftoff_mrec_placement_id), VungleAdSize.MREC);
-        vungleMREC.setAdListener(new BannerAdListener() {
-            @Override
-            public void onAdLoaded(@NonNull BaseAd baseAd) {
-                View mrecView = vungleMREC.getBannerView();
-                if (mrecView != null) {
-                    if (listener != null) listener.onAdLoaded(mrecView);
-                } else {
-                    loadBannerAsFallback(context, listener);
+        try {
+            BannerAd vungleMREC = new BannerAd(context, context.getString(R.string.liftoff_mrec_placement_id), VungleAdSize.MREC);
+            vungleMREC.setAdListener(new BannerAdListener() {
+                @Override
+                public void onAdLoaded(@NonNull BaseAd baseAd) {
+                    View mrecView = vungleMREC.getBannerView();
+                    if (mrecView != null) {
+                        if (listener != null) listener.onAdLoaded(mrecView);
+                    } else {
+                        loadBannerAsFallback(context, listener);
+                    }
                 }
-            }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                loadAdMobMREC_Fallback(context, listener);
-            }
+                @Override
+                public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    loadAdMobMREC_Fallback(context, listener);
+                }
 
-            @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                loadAdMobMREC_Fallback(context, listener);
-            }
+                @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    loadAdMobMREC_Fallback(context, listener);
+                }
 
-            @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
-            @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
-            @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
-            @Override public void onAdStart(@NonNull BaseAd baseAd) {}
-            @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
-        });
-        vungleMREC.load((String) null);
+                @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
+                @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
+                @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
+                @Override public void onAdStart(@NonNull BaseAd baseAd) {}
+                @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
+            });
+            vungleMREC.load((String) null);
+        } catch (Exception e) {
+            loadAdMobMREC_Fallback(context, listener);
+        }
     }
 
     private static void loadAdMobMREC_Fallback(Context context, FlexibleAdListener listener) {
@@ -672,38 +692,42 @@ public class AdManagerHelper {
     }
 
     private static void loadVungleBannerAsFallback(Context context, FlexibleAdListener listener) {
-        if (!isMobileAdsInitialized.get()) {
+        if (!isMobileAdsInitialized.get() || !VungleAds.isInitialized()) {
             loadUnityBannerAsFallback(context, listener);
             return;
         }
-        BannerAd vungleBanner = new BannerAd(context, context.getString(R.string.liftoff_banner_placement_id), VungleAdSize.BANNER);
-        vungleBanner.setAdListener(new BannerAdListener() {
-            @Override
-            public void onAdLoaded(@NonNull BaseAd baseAd) {
-                View bannerView = vungleBanner.getBannerView();
-                if (bannerView != null) {
-                    if (listener != null) listener.onAdLoaded(bannerView);
-                } else {
+        try {
+            BannerAd vungleBanner = new BannerAd(context, context.getString(R.string.liftoff_banner_placement_id), VungleAdSize.BANNER);
+            vungleBanner.setAdListener(new BannerAdListener() {
+                @Override
+                public void onAdLoaded(@NonNull BaseAd baseAd) {
+                    View bannerView = vungleBanner.getBannerView();
+                    if (bannerView != null) {
+                        if (listener != null) listener.onAdLoaded(bannerView);
+                    } else {
+                        loadUnityBannerAsFallback(context, listener);
+                    }
+                }
+
+                @Override
+                public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
                     loadUnityBannerAsFallback(context, listener);
                 }
-            }
 
-            @Override
-            public void onAdFailedToLoad(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                loadUnityBannerAsFallback(context, listener);
-            }
+                @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
+                    loadUnityBannerAsFallback(context, listener);
+                }
 
-            @Override public void onAdFailedToPlay(@NonNull BaseAd baseAd, @NonNull VungleError vungleError) {
-                loadUnityBannerAsFallback(context, listener);
-            }
-
-            @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
-            @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
-            @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
-            @Override public void onAdStart(@NonNull BaseAd baseAd) {}
-            @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
-        });
-        vungleBanner.load((String) null);
+                @Override public void onAdClicked(@NonNull BaseAd baseAd) {}
+                @Override public void onAdLeftApplication(@NonNull BaseAd baseAd) {}
+                @Override public void onAdImpression(@NonNull BaseAd baseAd) {}
+                @Override public void onAdStart(@NonNull BaseAd baseAd) {}
+                @Override public void onAdEnd(@NonNull BaseAd baseAd) {}
+            });
+            vungleBanner.load((String) null);
+        } catch (Exception e) {
+            loadUnityBannerAsFallback(context, listener);
+        }
     }
 
     private static void loadUnityBannerAsFallback(Context context, FlexibleAdListener listener) {
